@@ -8,8 +8,10 @@
     <link rel="icon" href="./resources/cv.png" />
     -->
     <link rel="stylesheet" href="./css/utils.css" />
+    <link rel="stylesheet" href="./css/header.css" />
     <link rel="stylesheet" href="./css/index.css" />
     <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/three.min.js"></script>
     <!--
     <script src="./js/config.js"></script>
     <script src="./js/data.js"></script>
@@ -20,10 +22,33 @@
 
 <body>
     <div class="container">
-        <div class="setting-panel">
-            <div class="resizer" id='bottom'></div>
-        </div>
-        <div class="map-panel">
+            <div class="header">
+                <div class="nav-bar">
+                    <input type="checkbox" class="button" value="Menu">
+                    <ul class="menu">
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/friend">Amigos</a></li>
+                        <li>
+                            <a href="/question">Preguntas &#65516;</a>
+                            <ul class="hidden-menu">
+                                <li><a href="/question/create">Crear</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        <div class="main">
+            <div class="map-panel">
+                <div class="draw-panel">
+                    <canvas class="canvas"></canvas>
+                </div>
+                <div class="icon-panel">
+                    <div class="resizer" id='left'></div>
+                </div>
+            </div>
+            <div class="setting-panel">
+                <div class="resizer" id='top'></div>
+            </div>
         </div>
     </div>
 </body>

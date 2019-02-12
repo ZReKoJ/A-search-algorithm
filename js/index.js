@@ -2,4 +2,5 @@
 
 $(() => {
     makeResizableDiv('.setting-panel');
+    makeResizableDiv('.icon-panel');
 });

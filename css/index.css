@@ -1,31 +1,31 @@
-.container {
+.main {
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 0;
+    top: 50px;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: valc(100% - 50px);
     background-color: var(--surface-color);
 }
 
 .setting-panel {
     position: relative;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
     height: 50px;
     min-height: 50px;
     max-height: 200px;
-    background-color: aqua;
+    background-color: var(--primary-light-color);
 }
 
-.setting-panel>.resizer#bottom {
+.setting-panel>.resizer#top {
     position: absolute;
-    bottom: 0;
+    top: 0;
     width: 100%;
     height: 5px;
     background-color: var(--primary-dark-color);
@@ -33,5 +33,33 @@
 
 .map-panel {
     flex-grow: 100;
-    background-color: beige;
+    display: flex;
+    flex-direction: row;
+}
+
+.icon-panel {
+    position: relative;
+    right: 0;
+    width: 200px;
+    min-width: 200px;
+    max-width: 300px;
+    background-color: var(--secondary-color);
+}
+
+.icon-panel>.resizer#left {
+    position: absolute;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--primary-dark-color);
+}
+
+.draw-panel {
+    flex-grow: 100;
+    background-color: var(--secondary-light-color);
+}
+
+.draw-panel>.canvas {
+    width: 100%;
+    height: 100%;
 }

@@ -5,8 +5,9 @@ var states = new Array(2);
 const resize = 0;
 const drag = 1;
 
-function makeResizableDiv(div, action="mousedown") {
+function makeResizableDiv(div, action = "mousedown") {
     const element = document.querySelector(div);
+    const style = window.getComputedStyle(element);
     const resizers = document.querySelectorAll(div + ' .resizer')
 
     let measures = element.getBoundingClientRect();
@@ -15,7 +16,9 @@ function makeResizableDiv(div, action="mousedown") {
     let resizing = {
         'top': (e) => {
             element.style.height = measures.height - (e.pageY - measures.y) + 'px';
-            element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
+            if (style.getPropertyValue('position') == 'absolute') {
+                element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
+            }
         },
         'right': (e) => {
             element.style.width = measures.width + (e.pageX - measures.x) + 'px';
@@ -25,18 +28,24 @@ function makeResizableDiv(div, action="mousedown") {
         },
         'left': (e) => {
             element.style.width = measures.width - (e.pageX - measures.x) + 'px';
-            element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            if (style.getPropertyValue('position') == 'absolute') {
+                element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            }
         },
         'top-left': (e) => {
             element.style.width = measures.width - (e.pageX - measures.x) + 'px';
             element.style.height = measures.height - (e.pageY - measures.y) + 'px';
-            element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
-            element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            if (style.getPropertyValue('position') == 'absolute') {
+                element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
+                element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            }
         },
         'top-right': (e) => {
             element.style.width = measures.width + (e.pageX - measures.x) + 'px';
             element.style.height = measures.height - (e.pageY - measures.y) + 'px';
-            element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
+            if (style.getPropertyValue('position') == 'absolute') {
+                element.style.top = Math.min(measures.top + (e.pageY - measures.y), measures.bottom) + 'px';
+            }
         },
         'bottom-right': (e) => {
             element.style.width = measures.width + (e.pageX - measures.x) + 'px';
@@ -45,7 +54,9 @@ function makeResizableDiv(div, action="mousedown") {
         'bottom-left': (e) => {
             element.style.height = measures.height + (e.pageY - measures.y) + 'px';
             element.style.width = measures.width - (e.pageX - measures.x) + 'px';
-            element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            if (style.getPropertyValue('position') == 'absolute') {
+                element.style.left = Math.min(measures.left + (e.pageX - measures.x), measures.right) + 'px';
+            }
         }
     }
 
@@ -74,7 +85,7 @@ function makeResizableDiv(div, action="mousedown") {
     });
 }
 
-function makeDraggableDiv(selector, action="mousedown") {
+function makeDraggableDiv(selector, action = "mousedown") {
     let x, y;
 
     const element = document.querySelector(selector);
@@ -104,7 +115,7 @@ function makeDraggableDiv(selector, action="mousedown") {
     }
 
     function closeDragElement() {
-        document.removeEventListener('mouseup', closeDragElement); 
+        document.removeEventListener('mouseup', closeDragElement);
         document.removeEventListener('mousemove', elementDrag);
     }
 }

@@ -1,0 +1,37 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--surface-color);
+}
+
+.setting-panel {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 50px;
+    min-height: 50px;
+    max-height: 200px;
+    background-color: aqua;
+}
+
+.setting-panel>.resizer#bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--primary-dark-color);
+}
+
+.map-panel {
+    flex-grow: 100;
+    background-color: beige;
+}

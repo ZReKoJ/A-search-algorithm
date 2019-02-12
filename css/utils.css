@@ -44,6 +44,24 @@
     border-radius: 50%;
 }
 
+.button {
+    -webkit-appearance: button;
+    display: flex;
+    padding: 6px 12px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-weight: bold;
+    user-select: none;
+}
+
+.button:focus {
+    outline: none;
+}
+
 .text-cut {
     white-space: nowrap; 
     overflow: hidden;

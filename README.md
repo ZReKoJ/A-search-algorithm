@@ -84,25 +84,6 @@ Se pretende implementar una versión simplificada como sigue:
     ya tenía y el recién calculado: min(nuevo f(n), viejo f(n)).
 7. Ir al paso 3
 
-```
-1 2 3 4 5
-```
-```
-1
-```
-```
-2
-```
-```
-3
-```
-```
-4
-```
-```
-5
-```
-
 4.- Aplicaciones
 
 ```

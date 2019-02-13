@@ -66,3 +66,7 @@
     background-color: var(--secondary-light-color);
     overflow: hidden;
 }
+
+.draw-panel>canvas {
+    cursor: crosshair;
+}

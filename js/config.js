@@ -1,0 +1,10 @@
+'use strict'
+
+const CONFIG = {
+    IS_DRAGGING: false,
+    IS_LEFT_MOUSE_BUTTON: false,
+    IS_RIGHT_MOUSE_BUTTON: false,
+    MOUSE_SCROLL_RELATION : 0.1,
+    CAMERA_HORIZONTAL_LOOK_AT: 0.001,
+    OBJECT_POSITION_RELATION : 0.01
+}

@@ -4,11 +4,14 @@ document.addEventListener("DOMContentLoaded", () => {
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 
-    var algorithmScene = new AlgorithmScene('.draw-panel');
+    let scene = new AlgorithmScene('.draw-panel');
+
+    let algorithm = new ASearchAlgorithm(9, 10);
+    algorithm.print();
 
     function animate() {
         requestAnimationFrame(animate);
-        algorithmScene.animate();
+        scene.animate();
     }
 
     animate();

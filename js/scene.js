@@ -11,6 +11,41 @@ class AlgorithmScene {
         this.init();
         this.materials();
         this.listeners();
+
+        this.cameraMovements = {
+            forwards : function(camera) {
+                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z -= -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+            },
+            backwards : function(camera) {
+                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z += -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+            },
+            toUp : function(camera, relation=10) {
+                camera.position.y -= CONFIG.OBJECT_TRANSITION_RELATION * relation;
+            },
+            toDown : function(camera, relation=10) {
+                camera.position.y += CONFIG.OBJECT_TRANSITION_RELATION * relation;
+            },
+            toLeft : function(camera, relation=10) {
+                camera.position.x += CONFIG.OBJECT_TRANSITION_RELATION * relation;
+            },
+            toRight : function(camera, relation=10) {
+                camera.position.x -= CONFIG.OBJECT_TRANSITION_RELATION * relation;
+            },
+            lookAtLeft : function(camera, relation=10) {
+                camera.rotation.y -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            lookAtRight : function(camera, relation=10) {
+                camera.rotation.y += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            lookAtUp : function(camera, relation=10) {
+                camera.rotation.x -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            lookAtDown : function(camera, relation=10) {
+                camera.rotation.x += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            }
+        }
     }
 
     animate() {
@@ -57,78 +92,82 @@ class AlgorithmScene {
     listeners() {
         let event;
 
-        this.canvas.addEventListener('wheel', (e) => {
-            if (e.deltaY > 0) {
-                this.camera.position.x += Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                this.camera.position.z += -Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-            } else {
-                this.camera.position.x -= Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                this.camera.position.z -= -Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-
-            }
-        });
         this.canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             //e.stopPropagation();
         });
-        this.canvas.addEventListener('mousedown', (e) => {
-            CONFIG.IS_DRAGGING = true;
-            switch (e.which) {
-                case 1:
-                    CONFIG.IS_LEFT_MOUSE_BUTTON = true;
-                    break;
-                case 3:
-                    CONFIG.IS_RIGHT_MOUSE_BUTTON = true;
-                    break;
+
+        this.canvas.addEventListener('wheel', (e) => {
+            if (e.deltaY > 0) {
+                this.cameraMovements.backwards(this.camera);
+            } else {
+                this.cameraMovements.forwards(this.camera);
             }
+        });
+
+        this.canvas.addEventListener('mousedown', (e) => {
+            CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG] = true;
+            CONFIG.MOUSE.VALUES[e.which] = true;
             event = e;
             e.preventDefault();
         });
+
         this.canvas.addEventListener('mousemove', (e) => {
-            if (CONFIG.IS_DRAGGING) {
+            if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG]) {
                 let width = event.clientX - e.clientX;
                 let height = event.clientY - e.clientY;
-                if (CONFIG.IS_LEFT_MOUSE_BUTTON) {
+                if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
                     if (Math.abs(width) > Math.abs(height)) {
-                        this.camera.rotation.y += Math.PI * CONFIG.CAMERA_HORIZONTAL_LOOK_AT * width;
+                        this.cameraMovements.lookAtRight(this.camera, width);
                     } else {
-                        this.camera.rotation.x -= Math.PI * CONFIG.CAMERA_HORIZONTAL_LOOK_AT * height;
+                        this.cameraMovements.lookAtUp(this.camera, height);
                     }
                 }
-                if (CONFIG.IS_RIGHT_MOUSE_BUTTON) {
+                if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
                     if (Math.abs(width) > Math.abs(height)) {
-                        this.camera.position.x -= CONFIG.OBJECT_POSITION_RELATION * width;
+                        this.cameraMovements.toRight(this.camera, width);
                     } else {
-                        this.camera.position.y += CONFIG.OBJECT_POSITION_RELATION * height;
+                        this.cameraMovements.toDown(this.camera, height);
                     }
                 }
                 event = e;
             }
             e.preventDefault();
         });
+
         this.canvas.addEventListener('mouseup', (e) => {
-            CONFIG.IS_DRAGGING = false;
-            CONFIG.IS_LEFT_MOUSE_BUTTON = false;
-            CONFIG.IS_RIGHT_MOUSE_BUTTON = false;
+            CONFIG.MOUSE.VALUES.fill(false);
             e.preventDefault();
         });
+
         window.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case 'ArrowUp':
-                    this.camera.position.x -= Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                    this.camera.position.z -= -Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                    break;
-                case 'ArrowDown':
-                    this.camera.position.x += Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                    this.camera.position.z += -Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                    break;
-                case 'ArrowLeft':
-                this.camera.rotation.y -= Math.PI * CONFIG.CAMERA_HORIZONTAL_LOOK_AT * 10;
-                    break;
-                case 'ArrowRight':
-                    this.camera.rotation.y += Math.PI * CONFIG.CAMERA_HORIZONTAL_LOOK_AT * 10;
-                    break;
-            }
+            CONFIG.KEYBOARD.VALUES[e.which] = true;
+            Object.keys(CONFIG.KEYBOARD)
+            .filter(element => element != "VALUES")
+            .forEach(element => {
+                if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
+                    switch (element) {
+                        case 'ARROW_UP':
+                        this.cameraMovements.forwards(this.camera);
+                            break;
+                        case 'ARROW_DOWN':
+                        this.cameraMovements.backwards(this.camera);
+                            break;
+                        case 'ARROW_LEFT':
+                        this.cameraMovements.lookAtLeft(this.camera);
+                            break;
+                        case 'ARROW_RIGHT':
+                        this.cameraMovements.lookAtRight(this.camera);
+                            break;
+                    }
+                }
+            });
+            e.preventDefault();
+        });
+
+        window.addEventListener('keyup', (e) => {
+            CONFIG.KEYBOARD.VALUES[e.which] = false;
+            e.preventDefault();
         });
     }
 }

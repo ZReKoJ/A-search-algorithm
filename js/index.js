@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let scene = new AlgorithmScene('.draw-panel');
 
     let algorithm = new ASearchAlgorithm(9, 10);
-    algorithm.print();
 
     function animate() {
         requestAnimationFrame(animate);

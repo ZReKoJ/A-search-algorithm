@@ -13,9 +13,16 @@ const CONFIG = {
         ARROW_LEFT: 37,
         ARROW_UP: 38,
         ARROW_RIGHT: 39,
-        ARROW_DOWN: 40
+        ARROW_DOWN: 40,
+        SPACE: 32
     },
     MOUSE_SCROLL_RELATION : 0.1,
     CAMERA_LOOK_AT_RELATION: 0.001,
-    OBJECT_TRANSITION_RELATION : 0.01
+    OBJECT_TRANSITION_RELATION : 0.01,
+    CAMERA : {
+        MODE: {
+            GOD: 0,
+            PERSPECTIVE: 1
+        }
+    }
 }

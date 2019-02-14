@@ -1,6 +1,6 @@
 'use strict'
 
-class AlgorithmScene {
+class Scene {
     constructor(div) {
         this.element = document.querySelector(div);
 
@@ -9,41 +9,36 @@ class AlgorithmScene {
         });
 
         this.init();
-        this.materials();
         this.listeners();
 
         this.cameraMovements = {
-            forwards : function(camera) {
-                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z -= -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+            viewUp: function (camera, relation = 10) {
+                camera.rotation.x += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
             },
-            backwards : function(camera) {
-                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z += -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-            },
-            toUp : function(camera, relation=10) {
-                camera.position.y -= CONFIG.OBJECT_TRANSITION_RELATION * relation;
-            },
-            toDown : function(camera, relation=10) {
-                camera.position.y += CONFIG.OBJECT_TRANSITION_RELATION * relation;
-            },
-            toLeft : function(camera, relation=10) {
-                camera.position.x += CONFIG.OBJECT_TRANSITION_RELATION * relation;
-            },
-            toRight : function(camera, relation=10) {
-                camera.position.x -= CONFIG.OBJECT_TRANSITION_RELATION * relation;
-            },
-            lookAtLeft : function(camera, relation=10) {
-                camera.rotation.y -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            lookAtRight : function(camera, relation=10) {
-                camera.rotation.y += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            lookAtUp : function(camera, relation=10) {
+            viewDown: function (camera, relation = 10) {
                 camera.rotation.x -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
             },
-            lookAtDown : function(camera, relation=10) {
-                camera.rotation.x += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            viewRight: function (camera, relation = 10) {
+                camera.rotation.y -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            viewLeft: function (camera, relation = 10) {
+                camera.rotation.y += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            rotateRight: function (camera, relation = 10) {
+                camera.rotation.z += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            rotateLeft: function (camera, relation = 10) {
+                camera.rotation.z -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+            },
+            forwards: function (camera) {
+                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                //camera.position.y += -Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z += -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+            },
+            backwards: function (camera) {
+                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                //camera.position.y -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z -= -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
             }
         }
     }
@@ -73,20 +68,40 @@ class AlgorithmScene {
         this.element.append(this.renderer.domElement);
 
         this.canvas = this.element.querySelector('canvas');
-
-        this.camera.position.set(0, 3, -10);
-        this.camera.lookAt(new THREE.Vector3(0, 3, 0));
     }
 
-    materials() {
-        this.geometry = new THREE.PlaneGeometry(10, 10, 10, 10);
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            wireframe: true
-        });
-        this.plane = new THREE.Mesh(this.geometry, this.material);
-        this.plane.rotation.x -= Math.PI / 2;
+    setCameraMode(mode = CONFIG.CAMERA.MODE.GOD, distance = 10) {
+        switch (mode) {
+            case CONFIG.CAMERA.MODE.GOD:
+                this.camera.position.set(0, 0, distance);
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                break;
+            case CONFIG.CAMERA.MODE.PERSPECTIVE:
+                this.camera.position.set(0, -distance, distance / 2);
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                break;
+        }
+
+        return this;
+    }
+
+    addPlane(width = 10, height = 10) {
+        this.plane = new THREE.Mesh(
+            new THREE.PlaneGeometry(10, 10, width, height),
+            new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                wireframe: true
+            }));
         this.scene.add(this.plane);
+
+        return this;
+    }
+
+    resetScene() {
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0]);
+        }
+        return this;
     }
 
     listeners() {
@@ -118,16 +133,9 @@ class AlgorithmScene {
                 let height = event.clientY - e.clientY;
                 if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
                     if (Math.abs(width) > Math.abs(height)) {
-                        this.cameraMovements.lookAtRight(this.camera, width);
+                        this.cameraMovements.viewRight(this.camera, width);
                     } else {
-                        this.cameraMovements.lookAtUp(this.camera, height);
-                    }
-                }
-                if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
-                    if (Math.abs(width) > Math.abs(height)) {
-                        this.cameraMovements.toRight(this.camera, width);
-                    } else {
-                        this.cameraMovements.toDown(this.camera, height);
+                        this.cameraMovements.viewDown(this.camera, height);
                     }
                 }
                 event = e;
@@ -143,31 +151,36 @@ class AlgorithmScene {
         window.addEventListener('keydown', (e) => {
             CONFIG.KEYBOARD.VALUES[e.which] = true;
             Object.keys(CONFIG.KEYBOARD)
-            .filter(element => element != "VALUES")
-            .forEach(element => {
-                if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
-                    switch (element) {
-                        case 'ARROW_UP':
-                        this.cameraMovements.forwards(this.camera);
-                            break;
-                        case 'ARROW_DOWN':
-                        this.cameraMovements.backwards(this.camera);
-                            break;
-                        case 'ARROW_LEFT':
-                        this.cameraMovements.lookAtLeft(this.camera);
-                            break;
-                        case 'ARROW_RIGHT':
-                        this.cameraMovements.lookAtRight(this.camera);
-                            break;
+                .filter(element => element != "VALUES")
+                .forEach(element => {
+                    if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
+                        switch (element) {
+                            case 'ARROW_UP':
+                                this.cameraMovements.viewUp(this.camera);
+                                break;
+                            case 'ARROW_DOWN':
+                                this.cameraMovements.viewDown(this.camera);
+                                break;
+                            case 'ARROW_LEFT':
+                                this.cameraMovements.viewLeft(this.camera);
+                                break;
+                            case 'ARROW_RIGHT':
+                                this.cameraMovements.viewRight(this.camera);
+                                break;
+                            case 'SPACE':
+                                if (e.shiftKey) {
+                                    this.cameraMovements.backwards(this.camera);
+                                } else {
+                                    this.cameraMovements.forwards(this.camera);
+                                }
+                                break;
+                        }
                     }
-                }
-            });
-            e.preventDefault();
+                });
         });
 
         window.addEventListener('keyup', (e) => {
             CONFIG.KEYBOARD.VALUES[e.which] = false;
-            e.preventDefault();
         });
     }
 }

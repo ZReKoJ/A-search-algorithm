@@ -20,6 +20,8 @@
     height: 50px;
     min-height: 50px;
     max-height: 200px;
+    display: flex;
+    flex-direction: row;
     background-color: var(--primary-light-color);
 }
 

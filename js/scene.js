@@ -30,15 +30,28 @@ class Scene {
             rotateLeft: function (camera, relation = 10) {
                 camera.rotation.z -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
             },
+            /*
+                        forwards: function (camera) {
+                            camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                            //camera.position.y += -Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                            camera.position.z += -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                        },
+                        backwards: function (camera) {
+                            camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                            //camera.position.y -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                            camera.position.z -= -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                        },*/
             forwards: function (camera) {
-                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                //camera.position.y += -Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z += -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.y -= Math.sin(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z -= Math.cos(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z -= Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
             },
             backwards: function (camera) {
-                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                //camera.position.y -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z -= -Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.y += Math.sin(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z += Math.cos(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+                camera.position.z += Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
             }
         }
     }

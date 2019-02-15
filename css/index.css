@@ -53,6 +53,73 @@
     background-color: var(--secondary-color);
 }
 
+.icon-panel>.icons {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    width: calc(100% - 40px);
+    max-height: calc(100% - 40px);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.icon-panel>.icons::-webkit-scrollbar {
+    width: 10px;
+}
+
+.icon-panel>.icons::-webkit-scrollbar-track {
+    background: var(--secondary-light-color);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+.icon-panel>.icons::-webkit-scrollbar-thumb {
+    background: var(--secondary-dark-color);
+    border-radius: 5px;
+}
+
+.icon-panel>.icons::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(to right, var(--secondary-light-color) , var(--secondary-dark-color));
+}
+
+.icon-panel>.icons>.icon {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(50px - 4px);
+    height: calc(50px - 4px);
+    border: 2px solid transparent;
+}
+
+.icon-panel>.icons>.icon:hover {
+    border: 2px solid greenyellow;
+}
+
+.icon-panel>.icons img {
+    width: calc(100% - 4px);
+    height: auto;
+    z-index: 10;
+}
+
+.icon-panel>.icons input[type='radio'] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--secondary-dark-color);
+}
+
+.icon-panel>.icons input[type='radio']:checked {
+    background-color: var(--secondary-light-color);
+}
+
 .icon-panel>.resizer#left {
     position: absolute;
     left: 0;

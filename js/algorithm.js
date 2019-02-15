@@ -15,6 +15,7 @@ class Terrain {
         });
 
         this.init(height, width);
+        //this.print();
     }
 
     init(height, width) {

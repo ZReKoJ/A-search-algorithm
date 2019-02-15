@@ -147,7 +147,9 @@ class Scene {
     }
 
     add(i, j) {
-        this.addBlock(i, j);
+        switch (findIcon()) {
+            case "block": this.addBlock(i, j); break;
+        }
     }
 
     addBlock(i, j) {

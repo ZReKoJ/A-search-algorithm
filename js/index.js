@@ -39,3 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     animate();
 });
+
+function findIcon() {
+    return $(".icon-panel>.icons input[type='radio']:checked").val()
+}

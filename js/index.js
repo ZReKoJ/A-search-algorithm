@@ -24,12 +24,22 @@ document.addEventListener("DOMContentLoaded", () => {
     terrain.addBlock(6, 8)
     /**/
 
-    $(".setting-panel>button.start").on("click", () => {
+    let startButton = $(".setting-panel>button.start");
+    startButton.on("click", () => {
         width = Number($(".setting-panel>input[type='number'].width").val());
         height = Number($(".setting-panel>input[type='number'].height").val());
         scene.resetScene().addPlane(width, height);
         terrain.init(height, width);
         terrain.print();
+    });
+
+    let perspectiveButton = $(".setting-panel>button.perspective");
+    perspectiveButton.on("click", () => {
+        let buttonTitle = perspectiveButton.text().split(" ")[0].toUpperCase();
+        scene.setCameraMode(CONFIG.CAMERA.MODE[buttonTitle]);
+        let perspectiveKeys = Object.keys(CONFIG.CAMERA.MODE);
+        let perspective = perspectiveKeys[(perspectiveKeys.indexOf(buttonTitle) + 1) % perspectiveKeys.length];
+        perspectiveButton.text(perspective.charAt(0) + perspective.slice(1).toLowerCase() + " View");
     });
 
     function animate() {

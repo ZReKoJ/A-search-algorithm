@@ -39,14 +39,23 @@ class Scene {
                 camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
                 camera.position.y -= Math.sin(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
                 camera.position.z += Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+            },
+            toUp: function (camera, relation = 10) {
+                // only if i need to
+            },
+            toDown: function (camera, relation = 10) {
+                // only if i need to
+            },
+            toRight: function (camera, relation = 10) {
+                // only if i need to
+            },
+            toLeft: function (camera, relation = 10) {
+                // only if i need to
             }
         }
     }
 
     animate() {
-        //this.plane.rotation.x += 0.01;
-        //this.plane.rotation.y += 0.01;
-        //this.plane.rotation.z += 0.01;
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -67,32 +76,104 @@ class Scene {
         this.renderer.setSize(measures.width, measures.height);
         this.element.append(this.renderer.domElement);
 
-        this.canvas = this.element.querySelector('canvas');
+        this.raycaster = new THREE.Raycaster();
+
+        this.canvas = this.renderer.domElement;
     }
 
-    setCameraMode(mode = CONFIG.CAMERA.MODE.GOD, distance = 10) {
-        switch (mode) {
-            case CONFIG.CAMERA.MODE.GOD:
-                this.camera.position.set(0, 0, distance);
-                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-                break;
-            case CONFIG.CAMERA.MODE.PERSPECTIVE:
-                this.camera.position.set(0, -distance, distance / 2);
-                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-                break;
+    setCameraMode(mode = CONFIG.CAMERA.MODE.GOD) {
+        if (this.terrain) {
+            let distance = this.terrain.height;
+            switch (mode) {
+                case CONFIG.CAMERA.MODE.GOD:
+                    this.camera.position.set(0, 0, distance);
+                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    break;
+                case CONFIG.CAMERA.MODE.PERSPECTIVE:
+                    this.camera.position.set(0, -distance, distance / 2);
+                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    break;
+            }
+        } else {
+            throw new Error("No terrain set");
         }
 
         return this;
     }
 
-    addPlane(width = 10, height = 10) {
-        this.plane = new THREE.Mesh(
-            new THREE.PlaneGeometry(10, 10, width, height),
+    setTerrain(terrain) {
+        this.terrain = terrain;
+
+        let geometry = new THREE.PlaneGeometry(
+            this.terrain.width,
+            this.terrain.height,
+            this.terrain.width,
+            this.terrain.height
+        );
+
+        let materials = [
             new THREE.MeshBasicMaterial({
-                color: 0xffffff,
-                wireframe: true
-            }));
+                color: 0x000000
+            }),
+            new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+        ];
+
+        for (let i = 0; i < this.terrain.height; i++) {
+            for (let j = 0; j < this.terrain.width; j++) {
+                let index = (i * this.terrain.width + j) * 2;
+                geometry.faces[index].materialIndex = geometry.faces[index + 1].materialIndex = (i + j) % 2;
+            }
+        }
+
+        this.plane = new THREE.Mesh(geometry, materials);
+        this.plane.name = "ground";
+
         this.scene.add(this.plane);
+
+        return this;
+    }
+
+    meshClicked(name, point) {
+        // the left top box is the coord 0, 0
+        // x -> column y -> row
+        point.x += this.terrain.width / 2;
+        point.y *= -1;
+        point.y += this.terrain.height / 2;
+        point.x = point.x | 0;
+        point.y = point.y | 0;
+        this.add(point.y, point.x);
+    }
+
+    add(i, j) {
+        this.addBlock(i, j);
+    }
+
+    addBlock(i, j) {
+        if (this.terrain) {
+
+            this.terrain.addBlock(i, j);
+
+            let cube = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshBasicMaterial({
+                    color: 0xff0000
+                }));
+
+            cube.position.set(
+                -this.plane.geometry.parameters.width / 2 + 0.5,
+                this.plane.geometry.parameters.height / 2 - 0.5,
+                0
+            );
+
+            cube.position.x += j;
+            cube.position.y -= i;
+
+            this.scene.add(cube);
+        } else {
+            throw new Error("No terrain set");
+        }
 
         return this;
     }
@@ -120,6 +201,13 @@ class Scene {
             }
         });
 
+        this.canvas.addEventListener('click', (e) => {
+            if (e.which == CONFIG.MOUSE.LEFT_BUTTON) {
+                this.spaceClickListener(e);
+            }
+            e.preventDefault();
+        });
+
         this.canvas.addEventListener('mousedown', (e) => {
             CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG] = true;
             CONFIG.MOUSE.VALUES[e.which] = true;
@@ -132,6 +220,8 @@ class Scene {
                 let width = event.clientX - e.clientX;
                 let height = event.clientY - e.clientY;
                 if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
+                    this.spaceClickListener(e);
+                } else if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
                     if (Math.abs(width) > Math.abs(height)) {
                         this.cameraMovements.viewRight(this.camera, width);
                     } else {
@@ -144,6 +234,11 @@ class Scene {
         });
 
         this.canvas.addEventListener('mouseup', (e) => {
+            CONFIG.MOUSE.VALUES.fill(false);
+            e.preventDefault();
+        });
+
+        this.canvas.addEventListener('mouseout', (e) => {
             CONFIG.MOUSE.VALUES.fill(false);
             e.preventDefault();
         });
@@ -173,6 +268,7 @@ class Scene {
                                 } else {
                                     this.cameraMovements.forwards(this.camera);
                                 }
+                                e.preventDefault();
                                 break;
                         }
                     }
@@ -182,5 +278,23 @@ class Scene {
         window.addEventListener('keyup', (e) => {
             CONFIG.KEYBOARD.VALUES[e.which] = false;
         });
+    }
+
+    spaceClickListener(event) {
+
+        let mouse = new THREE.Vector2();
+        let rect = this.canvas.getBoundingClientRect();
+
+        mouse.x = ((event.clientX - rect.left) / this.canvas.clientWidth) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / this.canvas.clientHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(mouse, this.camera);
+        let intersects = this.raycaster.intersectObjects([
+            this.plane
+        ]);
+
+        if (intersects.length > 0) {
+            this.meshClicked(intersects[0].object.name, intersects[0].point);
+        }
     }
 }

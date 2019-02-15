@@ -49,10 +49,7 @@ class Terrain {
     }
 
     print() {
-        if (this.printable) {
-            clearInterval(this.printable);
-        }
-        this.printable = setInterval(() => {
+        setInterval(() => {
             this.updateMap();
             console.log(
                 this.map.map(row =>

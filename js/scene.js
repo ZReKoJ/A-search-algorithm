@@ -363,6 +363,10 @@ class Scene {
             e.preventDefault();
         });
 
+        this.canvas.addEventListener('touchstart', (e) => {
+            notifier.info("touching");
+        });
+
         window.addEventListener('keydown', (e) => {
             CONFIG.KEYBOARD.VALUES[e.which] = true;
             Object.keys(CONFIG.KEYBOARD)

@@ -4,10 +4,10 @@ document.addEventListener("DOMContentLoaded", () => {
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 
-    let widthInput = $(".setting-panel>input[type='number'].width");
-    let heightInput = $(".setting-panel>input[type='number'].height");
-    let mouseScrollInput = $(".setting-panel>input[type='number'].mouse-scroll");
-    let cameraLookAtInput = $(".setting-panel>input[type='number'].camera-look-at");
+    let widthInput = $(".setting-panel>.setting>input[type='number'].width");
+    let heightInput = $(".setting-panel>.setting>input[type='number'].height");
+    let mouseScrollInput = $(".setting-panel>.setting>input[type='number'].mouse-scroll");
+    let cameraLookAtInput = $(".setting-panel>.setting>input[type='number'].camera-look-at");
 
     mouseScrollInput.on("change", (e) => {
         CONFIG.MOUSE_SCROLL_RELATION = Number(mouseScrollInput.val()) * 0.1;
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .setTerrain(new Terrain(Number(widthInput.val()), Number(heightInput.val())))
         .setCameraMode(CONFIG.CAMERA.MODE.GOD);
 
-    let startButton = $(".setting-panel>button.start");
+    let startButton = $(".setting-panel>.setting>button.start");
     startButton.on("click", () => {
         if (
             Number(widthInput.attr("min")) <= Number(widthInput.val()) &&
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    let perspectiveButton = $(".setting-panel>button.perspective");
+    let perspectiveButton = $(".setting-panel>.setting>button.perspective");
     perspectiveButton.perspectiveMode = function (mode) {
         let perspectiveKeys = Object.keys(CONFIG.CAMERA.MODE);
         let perspective = perspectiveKeys[(perspectiveKeys.indexOf(mode) + 1) % perspectiveKeys.length];
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         perspectiveButton.perspectiveMode(buttonTitle);
     });
 
-    let runStopButton = $(".setting-panel>button.run-stop");
+    let runStopButton = $(".setting-panel>.setting>button.run-stop");
     let interval = undefined;
     runStopButton.on("click", () => {
         if (scene.isRunning()) {

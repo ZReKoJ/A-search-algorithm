@@ -23,6 +23,46 @@
     display: flex;
     flex-direction: row;
     background-color: var(--primary-light-color);
+    overflow-y: auto;
+    flex-wrap: wrap;
+}
+
+.setting-panel>.setting {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    right: 5px;
+    width: calc(100% - 10px);
+    max-height: calc(100% - 20px);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.setting-panel>.setting::-webkit-scrollbar {
+    width: 10px;
+}
+
+.setting-panel>.setting::-webkit-scrollbar-track {
+    background: var(--primary-color);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+.setting-panel>.setting::-webkit-scrollbar-thumb {
+    background: var(--primary-dark-color);
+    border-radius: 5px;
+}
+
+.setting-panel>.setting::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(to right, var(--primary-color) , var(--primary-dark-color));
+}
+
+.setting-panel>.setting>* {
+    height: 30px;
 }
 
 .setting-panel>.resizer#top {

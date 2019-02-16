@@ -4,22 +4,32 @@ document.addEventListener("DOMContentLoaded", () => {
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 
-    let widthButton = $(".setting-panel>input[type='number'].width");
-    let heightButton = $(".setting-panel>input[type='number'].height");
+    let widthInput = $(".setting-panel>input[type='number'].width");
+    let heightInput = $(".setting-panel>input[type='number'].height");
+    let mouseScrollInput = $(".setting-panel>input[type='number'].mouse-scroll");
+    let cameraLookAtInput = $(".setting-panel>input[type='number'].camera-look-at");
+
+    mouseScrollInput.on("change", (e) => {
+        CONFIG.MOUSE_SCROLL_RELATION = Number(mouseScrollInput.val()) * 0.1;
+    });
+
+    cameraLookAtInput.on("change", (e) => {
+        CONFIG.CAMERA_LOOK_AT_RELATION = Number(cameraLookAtInput.val()) * 0.001;
+    });
 
     let scene = new Scene('.draw-panel')
-        .setTerrain(new Terrain(Number(widthButton.val()), Number(heightButton.val())))
+        .setTerrain(new Terrain(Number(widthInput.val()), Number(heightInput.val())))
         .setCameraMode(CONFIG.CAMERA.MODE.GOD);
 
     let startButton = $(".setting-panel>button.start");
     startButton.on("click", () => {
         if (
-            widthButton.attr("min") <= widthButton.val() &&
-            widthButton.attr("max") >= widthButton.val() &&
-            heightButton.attr("min") <= heightButton.val() &&
-            heightButton.attr("max") >= heightButton.val()
+            Number(widthInput.attr("min")) <= Number(widthInput.val()) &&
+            Number(widthInput.attr("max")) >= Number(widthInput.val()) &&
+            Number(heightInput.attr("min")) <= Number(heightInput.val()) &&
+            Number(heightInput.attr("max")) >= Number(heightInput.val())
         ) {
-            scene.resetScene().setTerrain(new Terrain(Number(widthButton.val()), Number(heightButton.val())))
+            scene.resetScene().setTerrain(new Terrain(Number(widthInput.val()), Number(heightInput.val())))
                 .setCameraMode(CONFIG.CAMERA.MODE.GOD);
             perspectiveButton.perspectiveMode("GOD")
         } else {

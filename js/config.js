@@ -1,6 +1,6 @@
 'use strict'
 
-const CONFIG = {
+var CONFIG = {
     MOUSE : {
         VALUES: new Array(4).fill(false),
         DRAG: 0,
@@ -18,7 +18,6 @@ const CONFIG = {
     },
     MOUSE_SCROLL_RELATION : 0.1,
     CAMERA_LOOK_AT_RELATION: 0.001,
-    OBJECT_TRANSITION_RELATION : 0.01,
     CAMERA : {
         MODE: {
             GOD: 0,

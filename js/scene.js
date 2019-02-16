@@ -204,7 +204,7 @@ class Scene {
         object.position.set(
             -this.plane.geometry.parameters.width / 2 + 0.5,
             this.plane.geometry.parameters.height / 2 - 0.5,
-            0
+            0.5
         );
 
         object.position.x += j;
@@ -241,7 +241,7 @@ class Scene {
         object.position.set(
             -this.plane.geometry.parameters.width / 2 + 0.5,
             this.plane.geometry.parameters.height / 2 - 0.5,
-            0
+            0.5
         );
 
         object.position.x += j;
@@ -271,7 +271,7 @@ class Scene {
         object.position.set(
             -this.plane.geometry.parameters.width / 2 + 0.5,
             this.plane.geometry.parameters.height / 2 - 0.5,
-            0
+            0.5
         );
 
         object.position.x += j;
@@ -311,7 +311,6 @@ class Scene {
 
         this.canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            //e.stopPropagation();
         });
 
         this.canvas.addEventListener('wheel', (e) => {

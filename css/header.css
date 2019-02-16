@@ -15,7 +15,10 @@
 	position: absolute;
 	top: 0;
 	left: 0;
+	width: 100%;
 	height: 100%;
+	display: flex;
+	flex-direction: row;
 }
 
 .nav-bar>input[type="checkbox"] {
@@ -25,6 +28,10 @@
 .menu,
 .hidden-menu {
 	list-style-type: none;
+}
+
+.menu {
+	min-width: 450px;
 }
 
 .menu>li {
@@ -64,6 +71,20 @@
 
 .hidden-menu:hover {
 	display: block;
+}
+
+.nav-bar>.notification-panel {
+	height: 100%;
+	flex-grow: 100;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.nav-bar>.notification-panel>#notification {
+    font-weight: bold;    
+    text-align: center;
 }
 
 @media screen and (max-width : 650px) {

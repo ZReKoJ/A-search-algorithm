@@ -30,6 +30,22 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+.info {
+    color: var(--info-color);
+}
+
+.success {
+    color: var(--success-color);
+}
+
+.warning {
+    color: var(--warning-color);
+}
+
+.error {
+    color: var(--error-color);
+}
+
 .img-width-fill {
     width: 100%;
     height: auto;

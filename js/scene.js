@@ -79,6 +79,8 @@ class Scene {
         this.raycaster = new THREE.Raycaster();
 
         this.canvas = this.renderer.domElement;
+
+        this.running = false;
     }
 
     setCameraMode(mode = CONFIG.CAMERA.MODE.GOD) {
@@ -95,7 +97,7 @@ class Scene {
                     break;
             }
         } else {
-            throw new Error("No terrain set");
+            throw new Error(messages.error.noTerrainSet);
         }
 
         return this;
@@ -136,46 +138,146 @@ class Scene {
     }
 
     meshClicked(name, point) {
-        // the left top box is the coord 0, 0
-        // x -> column y -> row
-        point.x += this.terrain.width / 2;
-        point.y *= -1;
-        point.y += this.terrain.height / 2;
-        point.x = point.x | 0;
-        point.y = point.y | 0;
-        this.add(point.y, point.x);
+        switch (name) {
+            case "ground":
+                // the left top box is the coord 0, 0
+                // x -> column y -> row
+                point.x += this.terrain.width / 2;
+                point.y *= -1;
+                point.y += this.terrain.height / 2;
+                point.x = point.x | 0;
+                point.y = point.y | 0;
+                this.actionOn(point.y, point.x);
+                break;
+        }
     }
 
-    add(i, j) {
-        switch (findIcon()) {
-            case "block": this.addBlock(i, j); break;
+    actionOn(i, j) {
+        try {
+            switch (findIcon()) {
+                case "block":
+                    this.addBlock(i, j);
+                    break;
+                case "start":
+                    this.setAvatar(i, j);
+                    break;
+                case "end":
+                    this.addFlag(i, j);
+                    break;
+                case "none":
+                    this.remove(i, j);
+                    break;
+            }
+        } catch (err) {
+            notifier.error(err.message);
+        }
+    }
+
+    remove(i, j) {
+        if (this.running && this.terrain && this.terrain.avatar.isEqual(new Coordinate(i, j))) {
+            throw new Error(messages.error.cannotChangeAvatarWhileRunning);
+        }
+
+        let object = this.scene.getObjectByName(String(i + " " + j));
+        if (object) {
+            this.scene.remove(object);
+            this.terrain.remove(i, j);
         }
     }
 
     addBlock(i, j) {
-        if (this.terrain) {
-
-            this.terrain.addBlock(i, j);
-
-            let cube = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshBasicMaterial({
-                    color: 0xff0000
-                }));
-
-            cube.position.set(
-                -this.plane.geometry.parameters.width / 2 + 0.5,
-                this.plane.geometry.parameters.height / 2 - 0.5,
-                0
-            );
-
-            cube.position.x += j;
-            cube.position.y -= i;
-
-            this.scene.add(cube);
-        } else {
-            throw new Error("No terrain set");
+        if (!this.terrain) {
+            throw new Error(messages.error.noTerrainSet);
         }
+
+        this.remove(i, j);
+        this.terrain.addBlock(i, j);
+
+        let object = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({
+                color: 0xff0000
+            }));
+
+        object.name = String(i + " " + j);
+
+        object.position.set(
+            -this.plane.geometry.parameters.width / 2 + 0.5,
+            this.plane.geometry.parameters.height / 2 - 0.5,
+            0
+        );
+
+        object.position.x += j;
+        object.position.y -= i;
+
+        this.scene.add(object);
+
+        return this;
+    }
+
+    setAvatar(i, j) {
+        if (!this.terrain) {
+            throw new Error(messages.error.noTerrainSet);
+        }
+
+        if (this.running) {
+            throw new Error(messages.error.cannotChangeAvatarWhileRunning);
+        }
+
+        this.remove(i, j);
+        let avatar = this.terrain.setAvatar(i, j);
+        if (avatar) {
+            this.remove(avatar.i, avatar.j);
+        }
+
+        let object = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({
+                color: 0x00ff00
+            }));
+
+        object.name = String(i + " " + j);
+
+        object.position.set(
+            -this.plane.geometry.parameters.width / 2 + 0.5,
+            this.plane.geometry.parameters.height / 2 - 0.5,
+            0
+        );
+
+        object.position.x += j;
+        object.position.y -= i;
+
+        this.scene.add(object);
+
+        return this;
+    }
+
+    addFlag(i, j) {
+        if (!this.terrain) {
+            throw new Error(messages.error.noTerrainSet);
+        }
+
+        this.remove(i, j);
+        this.terrain.addRoute(i, j);
+
+        let object = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({
+                color: 0x0000ff
+            }));
+
+        object.name = String(i + " " + j);
+
+        object.position.set(
+            -this.plane.geometry.parameters.width / 2 + 0.5,
+            this.plane.geometry.parameters.height / 2 - 0.5,
+            0
+        );
+
+        object.position.x += j;
+        object.position.y -= i;
+
+        this.scene.add(object);
 
         return this;
     }
@@ -185,6 +287,23 @@ class Scene {
             this.scene.remove(this.scene.children[0]);
         }
         return this;
+    }
+
+    isRunning() {
+        return this.running;
+    }
+
+    run() {
+        if (this.terrain) {
+            this.running = true;
+            this.terrain.movement();
+        } else {
+            throw new Error(messages.error.noTerrainSet);
+        }
+    }
+
+    stop() {
+        this.running = false;
     }
 
     listeners() {
@@ -251,6 +370,7 @@ class Scene {
                 .filter(element => element != "VALUES")
                 .forEach(element => {
                     if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
+                        e.preventDefault();
                         switch (element) {
                             case 'ARROW_UP':
                                 this.cameraMovements.viewUp(this.camera);
@@ -270,7 +390,6 @@ class Scene {
                                 } else {
                                     this.cameraMovements.forwards(this.camera);
                                 }
-                                e.preventDefault();
                                 break;
                         }
                     }

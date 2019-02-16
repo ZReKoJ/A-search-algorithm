@@ -131,3 +131,61 @@ function createArray(length) {
 
     return arr;
 }
+
+Object.defineProperty(Array.prototype, 'flat', {
+    value: function (depth = 1) {
+        return this.reduce(function (flat, toFlatten) {
+            return flat.concat((Array.isArray(toFlatten) && (depth - 1)) ? toFlatten.flat(depth - 1) : toFlatten);
+        }, []);
+    }
+});
+
+Object.defineProperty(Object.prototype, 'recursiveValues', {
+    value: function () {
+        return Object.values(this).map(value =>
+            (value instanceof Object) ? value.recursiveValues() : value
+        ).flat();
+    }
+});
+
+class Notifier {
+    constructor() {
+        this.lastNotification = new Date().getTime();
+        this.element = null;
+    }
+
+    info(text) {
+        this.notify(text, "info");
+    }
+
+    success(text) {
+        this.notify(text, "success");
+    }
+
+    warning(text) {
+        this.notify(text, "warning");
+    }
+
+    error(text) {
+        this.notify(text, "error");
+    }
+
+    notify(text, type) {
+        let self = this;
+        self.element = $('#notification');
+        self.lastNotification = new Date().getTime();
+        self.element.text(text);
+        self.element.removeClass();
+        self.element.addClass(type);
+        window.setTimeout(function () {
+            if (self.lastNotification + 3000 <= new Date().getTime()) {
+                self.element.fadeOut("slow", function () {
+                    self.element[0].innerHTML = '';
+                    self.element[0].removeAttribute('style');
+                });
+            }
+        }, 3000);
+    }
+}
+
+var notifier = new Notifier();

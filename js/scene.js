@@ -363,8 +363,9 @@ class Scene {
             e.preventDefault();
         });
 
-        this.canvas.addEventListener('touchstart', (e) => {
-            notifier.info("touching");
+        this.canvas.addEventListener('touchend', (e) => {
+            this.spaceClickListener(e);
+            e.preventDefault();
         });
 
         window.addEventListener('keydown', (e) => {

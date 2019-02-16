@@ -363,11 +363,6 @@ class Scene {
             e.preventDefault();
         });
 
-        this.canvas.addEventListener('touchend', (e) => {
-            this.spaceClickListener(e);
-            e.preventDefault();
-        });
-
         window.addEventListener('keydown', (e) => {
             CONFIG.KEYBOARD.VALUES[e.which] = true;
             Object.keys(CONFIG.KEYBOARD)

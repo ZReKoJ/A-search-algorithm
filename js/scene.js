@@ -196,7 +196,7 @@ class Scene {
         let object = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshBasicMaterial({
-                color: 0xff0000
+                color: 0xffff00
             }));
 
         object.name = String(i + " " + j);
@@ -263,7 +263,7 @@ class Scene {
         let object = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshBasicMaterial({
-                color: 0x0000ff
+                color: 0xff0000
             }));
 
         object.name = String(i + " " + j);
@@ -295,7 +295,10 @@ class Scene {
 
     run() {
         if (this.terrain) {
-            this.running = true;
+            if (!this.isRunning()) {
+                this.running = true;
+                this.snake = new Snake(this.scene, this.terrain.avatar);
+            }
             this.terrain.movement();
         } else {
             throw new Error(messages.error.noTerrainSet);
@@ -372,16 +375,32 @@ class Scene {
                         e.preventDefault();
                         switch (element) {
                             case 'ARROW_UP':
-                                this.cameraMovements.viewUp(this.camera);
+                                if (this.isRunning()) {
+                                    this.snake.movement(new Coordinate(-1, 0), true);
+                                } else {
+                                    this.cameraMovements.viewUp(this.camera);
+                                }
                                 break;
                             case 'ARROW_DOWN':
-                                this.cameraMovements.viewDown(this.camera);
+                                if (this.isRunning()) {
+                                    this.snake.movement(new Coordinate(1, 0), true);
+                                } else {
+                                    this.cameraMovements.viewDown(this.camera);
+                                }
                                 break;
                             case 'ARROW_LEFT':
-                                this.cameraMovements.viewLeft(this.camera);
+                                if (this.isRunning()) {
+                                    this.snake.movement(new Coordinate(0, -1), true);
+                                } else {
+                                    this.cameraMovements.viewLeft(this.camera);
+                                }
                                 break;
                             case 'ARROW_RIGHT':
-                                this.cameraMovements.viewRight(this.camera);
+                                if (this.isRunning()) {
+                                    this.snake.movement(new Coordinate(0, 1), true);
+                                } else {
+                                    this.cameraMovements.viewRight(this.camera);
+                                }
                                 break;
                             case 'SPACE':
                                 if (e.shiftKey) {

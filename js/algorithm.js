@@ -14,7 +14,8 @@ class Coordinate {
 class Terrain {
     constructor(height, width) {
         this.VALUES = Object.freeze({
-            BLOCK: -1,
+            BLOCK: -2,
+            AVATAR: -1,
             EMPTY: 0
         });
 
@@ -33,6 +34,7 @@ class Terrain {
 
     updateMap() {
         this.map.map(row => row.fill(this.VALUES.EMPTY));
+        this.map[this.avatar.i][this.avatar.j] = this.VALUES.AVATAR;
         this.routes.forEach((coord, index) => {
             this.map[coord.i][coord.j] = index + 1;
         });
@@ -80,6 +82,19 @@ class Terrain {
         }
         this.updateMap();
         this.print();
+
+        let randomMovs = [
+            new Coordinate(1, 0),
+            new Coordinate(1, 1),
+            new Coordinate(0, 1),
+            new Coordinate(-1, 1),
+            new Coordinate(-1, 0),
+            new Coordinate(-1, -1),
+            new Coordinate(0, -1),
+            new Coordinate(1, -1)
+        ];
+
+        return randomMovs[Math.floor(Math.random() * randomMovs.length)];
     }
 
     print() {
@@ -91,10 +106,8 @@ class Terrain {
                             return " ";
                         case this.VALUES.BLOCK:
                             return "X";
-                        case this.VALUES.START:
-                            return "S";
-                        case this.VALUES.END:
-                            return "E";
+                        case this.VALUES.AVATAR:
+                            return "A";
                         default:
                             return data;
                     }

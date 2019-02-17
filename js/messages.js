@@ -7,6 +7,7 @@ var messages = {
         noTerrainSet: "Please set the map dimensions",
         noGoalsSet: "You have not set any goals yet",
         cannotChangeAvatarWhileRunning: "You cannot change the avatar while running",
+        cannotRemoveObjectWhileRunning: "You cannot remove objects while running",
     },
     info: {
         uses: {

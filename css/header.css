@@ -88,9 +88,6 @@
 }
 
 @media screen and (max-width : 650px) {
-	.nav-bar {
-		width: 120px;
-	}
 
 	.nav-bar>input[type="checkbox"]::before {
 		content: attr(value);

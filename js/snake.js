@@ -7,8 +7,6 @@ class Snake {
 
         let head = this.newBody();
 
-        head.name = String("snake " + this.snake.length);
-
         let plane = this.scene.getObjectByName("ground");
 
         head.position.set(
@@ -33,45 +31,58 @@ class Snake {
             }));
     }
 
-    addBody(position) {
-        let body = this.newBody();
-
-        body.name = String("snake " + this.snake.length);
-
-        body.position.set(
-            position.x,
-            position.y,
-            position.z
-        );
-        
-        this.snake.push(body);
-
-        this.render(body);
-    }
-
     render(cube) {
         this.scene.add(cube);
     }
 
     movement(coord, add = false) {
-        let newPosition = this.snake[0].position,
-            aux;
+
+        let newPosition = {
+            x: this.snake[0].position.x,
+            y: this.snake[0].position.y,
+            z: this.snake[0].position.z
+        };
 
         newPosition.y -= coord.i;
         newPosition.x += coord.j;
 
-        this.snake.forEach(cube => {
-            aux = cube.position;
-            cube.position.set(
-                newPosition.x,
-                newPosition.y,
-                newPosition.z
-            );
-            newPosition = aux;
-        });
-
+        let body;
         if (add) {
-            this.addBody(aux);
+            body = this.newBody();
+            this.render(body);
+        } else {
+            body = this.snake.splice(this.snake.length - 1, 1);
+        }
+
+        body.position.set(
+            newPosition.x,
+            newPosition.y,
+            newPosition.z
+        );
+
+        this.snake.unshift(body);
+
+        this.check();
+    }
+
+    destruct(){
+        this.snake.forEach(body => {
+            this.scene.remove(body);
+        });
+    }
+
+    check() {
+        let head = this.snake[0];
+        let index = this.snake.findIndex(body => {
+            return head.id != body.id &&
+                head.position.x == body.position.x &&
+                head.position.y == body.position.y &&
+                head.position.z == body.position.z
+        });
+        if (index > -1) {
+            this.snake.splice(index).forEach(body => {
+                this.scene.remove(body);
+            });
         }
     }
 }

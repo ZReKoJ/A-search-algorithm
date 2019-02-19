@@ -306,12 +306,23 @@ class Scene {
 
     run() {
         if (this.terrain) {
-            let movement = this.terrain.movement();
+            this.terrain.updateMap();
+            
             if (!this.isRunning()) {
                 this.running = true;
                 this.snake = new Snake(this.scene, this.terrain.avatar);
+                this.terrain.prepare();
             }
-            this.snake.movement(movement, true);
+
+            let movement = this.terrain.movement();
+
+            if (movement.eaten) {
+                let object = this.scene.getObjectByName(String(movement.eaten.i + " " + movement.eaten.j));
+                if (object) {
+                    this.scene.remove(object);
+                }
+            }
+            this.snake.movement(movement.coord, true);
             this.snake.check();
         } else {
             throw new Error(messages.error.noTerrainSet);

@@ -37,10 +37,12 @@ class Snake {
 
     movement(coord, add = false) {
 
+        let plane = this.scene.getObjectByName("ground");
+
         let newPosition = {
-            x: this.snake[0].position.x,
-            y: this.snake[0].position.y,
-            z: this.snake[0].position.z
+            x : -plane.geometry.parameters.width / 2 + 0.5,
+            y : plane.geometry.parameters.height / 2 - 0.5,
+            z : 0.5
         };
 
         newPosition.y -= coord.i;

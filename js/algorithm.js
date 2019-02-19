@@ -9,6 +9,79 @@ class Coordinate {
     isEqual(that) {
         return this.i == that.i && this.j == that.j;
     }
+
+    distanceTo(that) {
+        return Math.sqrt(
+            (this.i - that.i) * (this.i - that.i) +
+            (this.j - that.j) * (this.j - that.j)
+        )
+    }
+
+    toString() {
+        return String("[" + this.i + ", " + this.j + "]")
+    }
+
+    range(from, to) {
+        return (
+            from.i <= this.i &&
+            this.i <= to.i &&
+            from.j <= this.j &&
+            this.j <= to.j
+        );
+    }
+
+    surrounding() {
+        return [
+            new Coordinate(this.i - 1, this.j + 1),
+            new Coordinate(this.i, this.j + 1),
+            new Coordinate(this.i + 1, this.j + 1),
+            new Coordinate(this.i + 1, this.j),
+            new Coordinate(this.i + 1, this.j - 1),
+            new Coordinate(this.i, this.j - 1),
+            new Coordinate(this.i - 1, this.j - 1),
+            new Coordinate(this.i - 1, this.j)
+        ]
+    }
+}
+
+class Node {
+    constructor(coord) {
+        this.coord = coord;
+        this.g = undefined;
+        this.h = undefined;
+        this.f = undefined;
+    }
+
+    parent(parent) {
+        this.g = Number(parent ? this.coord.distanceTo(parent.coord) + parent.g : 0);
+        return this;
+    }
+
+    goal(coord) {
+        this.h = Number(this.coord.distanceTo(coord));
+        this.f = Number(this.g + this.h);
+        return this;
+    }
+
+    isEqual(that) {
+        return this.coord.isEqual(that.coord);
+    }
+
+    isLessThan(that) {
+        if (this.f && that.f) {
+            return this.f < that.f;
+        } else {
+            throw new Error(messages.error.undefined);
+        }
+    }
+
+    toString() {
+        return this.coord.toString() + "{" + this.g + ", " + this.h + ", " + this.f + "}";
+    }
+
+    surrounding() {
+        return this.coord.surrounding().map(coord => new Node(coord));
+    }
 }
 
 class Terrain {
@@ -30,9 +103,16 @@ class Terrain {
         this.avatar = undefined;
         this.routes = [];
         this.blocks = [];
+
+        this.open = [];
+        this.closed = [];
     }
 
     updateMap() {
+        if (!this.avatar) {
+            throw new Error(messages.error.noAvatarSet);
+        }
+
         this.map.map(row => row.fill(this.VALUES.EMPTY));
         this.map[this.avatar.i][this.avatar.j] = this.VALUES.AVATAR;
         this.routes.forEach((coord, index) => {
@@ -47,6 +127,7 @@ class Terrain {
         let coord = new Coordinate(i, j);
         this.blocks = this.blocks.filter(block => !coord.isEqual(block));
         this.routes = this.routes.filter(route => !coord.isEqual(route));
+        this.closed = this.closed.filter(closed => !(new Coordinate(coord).isEqual(closed)));
         if (this.avatar && coord.isEqual(this.avatar)) {
             this.avatar = undefined;
         }
@@ -54,7 +135,16 @@ class Terrain {
 
     addBlock(i, j) {
         if (0 <= i && i < this.height && 0 <= j && j < this.width) {
-            this.blocks.push(new Coordinate(i, j));
+            let coord = new Coordinate(i, j);
+            let index = this.blocks.findIndex(block => coord.isEqual(block));
+            if (index == -1) {
+                this.blocks.push(coord);
+            }
+            let node = new Node(coord);
+            index = this.closed.findIndex(closed => node.isEqual(closed));
+            if (index == -1) {
+                this.closed.push(node);
+            }
         }
     }
 
@@ -69,32 +159,57 @@ class Terrain {
         if (0 <= i && i < this.height && 0 <= j && j < this.width) {
             coord = this.avatar;
             this.avatar = new Coordinate(i, j);
+            this.open = [new Node(this.avatar).parent()];
         }
         return coord;
     }
 
-    movement() {
-        if (!this.avatar) {
-            throw new Error(messages.error.noAvatarSet);
+    prepare() {
+        if (this.routes.length > 0) {
+            this.open.forEach(open => {
+                open.goal(this.routes[0])
+            });
+            this.open.sort((a, b) => a.isLessThan(b));
         }
+    }
+
+    movement() {
         if (this.routes.length < 1) {
             throw new Error(messages.error.noGoalsSet);
         }
+
+        let node = this.open.splice(0, 1)[0];
+        this.closed.push(node);
+        this.avatar = node.coord;
+        if (node.h > 0) {
+            let surroundings = node.surrounding()
+                .filter(
+                    element => element.coord.range(
+                        new Coordinate(0, 0),
+                        new Coordinate(this.height - 1, this.width - 1)
+                    )
+                )
+                .filter(
+                    element => this.closed.findIndex(closed => element.isEqual(closed)) == -1
+                );
+            surroundings.forEach(element => {
+                element.parent(node).goal(this.routes[0]);
+                let index = this.open.findIndex(open => element.isLessThan(open));
+                if (index > -1) {
+                    this.open.splice(index, element.isEqual(this.open[index]) ? 1 : 0, element);
+                } else {
+                    this.open.push(element);
+                }
+            });
+        }
+
         this.updateMap();
         this.print();
 
-        let randomMovs = [
-            new Coordinate(1, 0),
-            new Coordinate(1, 1),
-            new Coordinate(0, 1),
-            new Coordinate(-1, 1),
-            new Coordinate(-1, 0),
-            new Coordinate(-1, -1),
-            new Coordinate(0, -1),
-            new Coordinate(1, -1)
-        ];
-
-        return randomMovs[Math.floor(Math.random() * randomMovs.length)];
+        return {
+            coord: node.coord,
+            eaten: undefined
+        };
     }
 
     print() {
@@ -114,9 +229,12 @@ class Terrain {
                 }).join("|") + "|"
             ).join("\n") +
             "\n" +
-            "avatar : " + ((this.avatar) ? "[" + this.avatar.i + ", " + this.avatar.j + "]" : "") + "\n" +
-            "blocks : " + this.blocks.map(block => "[" + block.i + ", " + block.j + "]").join(", ") + "\n" +
-            "routes : " + this.routes.map(route => "[" + route.i + ", " + route.j + "]").join(", ") + "\n"
+            "avatar : " + ((this.avatar) ? this.avatar.toString() : "") + "\n" +
+            "blocks : " + this.blocks.map(block => block.toString()).join(", ") + "\n" +
+            "routes : " + this.routes.map(route => route.toString()).join(", ") + "\n" +
+            "\n" +
+            "open   : " + this.open.map(open => "\n" + open.toString()).join(", ") + "\n" +
+            "closed  : " + this.closed.map(closed => "\n" + closed.toString()).join(", ") + "\n"
         );
     }
 }

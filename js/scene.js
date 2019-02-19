@@ -174,13 +174,13 @@ class Scene {
     }
 
     remove(i, j) {
-        if (this.running && this.terrain && this.terrain.avatar.isEqual(new Coordinate(i, j))) {
+        if (this.isRunning() && this.terrain && this.terrain.avatar.isEqual(new Coordinate(i, j))) {
             throw new Error(messages.error.cannotChangeAvatarWhileRunning);
         }
 
         let object = this.scene.getObjectByName(String(i + " " + j));
         if (object) {
-            if (this.isRunning && object.visible) {
+            if (this.isRunning() && object.visible) {
                 throw new Error(messages.error.cannotRemoveObjectWhileRunning);
             }
             this.scene.remove(object);
@@ -215,6 +215,10 @@ class Scene {
 
         this.scene.add(object);
 
+        if (this.snake) {
+            this.snake.check(object);
+        }
+
         return this;
     }
 
@@ -223,7 +227,7 @@ class Scene {
             throw new Error(messages.error.noTerrainSet);
         }
 
-        if (this.running) {
+        if (this.isRunning()) {
             throw new Error(messages.error.cannotChangeAvatarWhileRunning);
         }
 
@@ -282,6 +286,10 @@ class Scene {
 
         this.scene.add(object);
 
+        if (this.snake) {
+            this.snake.check(object);
+        }
+
         return this;
     }
 
@@ -298,12 +306,13 @@ class Scene {
 
     run() {
         if (this.terrain) {
+            let movement = this.terrain.movement();
             if (!this.isRunning()) {
                 this.running = true;
                 this.snake = new Snake(this.scene, this.terrain.avatar);
             }
-            let movement = this.terrain.movement();
             this.snake.movement(movement, true);
+            this.snake.check();
         } else {
             throw new Error(messages.error.noTerrainSet);
         }
@@ -311,8 +320,10 @@ class Scene {
 
     stop() {
         this.running = false;
-        this.snake.destruct();
-        this.snake = undefined;
+        if (this.snake) {
+            this.snake.destruct();
+            this.snake = undefined;
+        }
     }
 
     listeners() {

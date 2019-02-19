@@ -65,21 +65,31 @@ class Snake {
         this.check();
     }
 
-    destruct(){
+    destruct() {
         this.snake.forEach(body => {
             this.scene.remove(body);
         });
     }
 
-    check() {
+    check(object) {
         let head = this.snake[0];
         let index = this.snake.findIndex(body => {
-            return head.id != body.id &&
+            return (
+                head.id != body.id &&
                 head.position.x == body.position.x &&
                 head.position.y == body.position.y &&
                 head.position.z == body.position.z
+            ) || (
+                object &&
+                object.position.x == body.position.x &&
+                object.position.y == body.position.y &&
+                object.position.z == body.position.z
+            );
         });
         if (index > -1) {
+            if (index == 0) {
+                index++;
+            }
             this.snake.splice(index).forEach(body => {
                 this.scene.remove(body);
             });

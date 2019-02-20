@@ -314,16 +314,18 @@ class Scene {
                 this.terrain.prepare();
             }
 
-            let movement = this.terrain.movement();
+            let movements = this.terrain.movement();
+            let index = 0;
 
-            if (movement.eaten) {
-                let object = this.scene.getObjectByName(String(movement.eaten.i + " " + movement.eaten.j));
-                if (object) {
-                    this.scene.remove(object);
+            let interval = setInterval(() => {
+                if (index < movements.length) {
+                    this.snake.movement(movements[index], true);
+                    this.snake.check();
+                    index++;
+                } else {
+                    clearInterval(interval);
                 }
-            }
-            this.snake.movement(movement.coord, true);
-            this.snake.check();
+            }, 1000);
         } else {
             throw new Error(messages.error.noTerrainSet);
         }

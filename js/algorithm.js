@@ -12,8 +12,8 @@ class Coordinate {
 
     distanceTo(that) {
         return Math.sqrt(
-            (this.i - that.i) * (this.i - that.i) +
-            (this.j - that.j) * (this.j - that.j)
+            ((this.i - that.i) * (this.i - that.i)) +
+            ((this.j - that.j) * (this.j - that.j))
         )
     }
 
@@ -47,20 +47,64 @@ class Coordinate {
 class Node {
     constructor(coord) {
         this.coord = coord;
-        this.g = undefined;
+
+        this.parentNode = undefined;
+        this.childrenNodes = [];
+        this.goalNode = undefined;
+
+        this.g = 0;
         this.h = undefined;
         this.f = undefined;
     }
 
-    parent(parent) {
-        this.g = Number(parent ? this.coord.distanceTo(parent.coord) + parent.g : 0);
+    addParent(parent) {
+        if (parent) {
+            this.parentNode = parent;
+            this.parentNode.addChild(this);
+            this.g = Number(this.coord.distanceTo(this.parentNode.coord) + this.parentNode.g);
+        } else {
+            this.g = 0;
+        }
         return this;
     }
 
-    goal(coord) {
-        this.h = Number(this.coord.distanceTo(coord));
-        this.f = Number(this.g + this.h);
+    removeParent() {
+        if (this.parentNode) {
+            this.parentNode.removeChild(this);
+            this.parentNode = undefined;
+            this.g = 0;
+        }
         return this;
+    }
+
+    addChild(child) {
+        this.childrenNodes.push(child);
+    }
+
+    removeChild(child) {
+        let index = this.childrenNodes.findIndex(element => element.isEqual(child));
+        if (index > -1) {
+            this.childrenNodes.splice(index, 1);
+        }
+    }
+
+    goal(coord) {
+        if (coord) {
+            this.goalNode = coord;
+        }
+        if (this.goalNode) {
+            this.h = Number(this.coord.distanceTo(this.goalNode));
+            this.f = Number(this.g + this.h);
+        }
+        return this;
+    }
+
+    update() {
+        this.addParent(this.parentNode);
+        this.goal(this.goalNode);
+        this.childrenNodes.forEach(child => {
+            child.update();
+        });
     }
 
     isEqual(that) {
@@ -159,7 +203,7 @@ class Terrain {
         if (0 <= i && i < this.height && 0 <= j && j < this.width) {
             coord = this.avatar;
             this.avatar = new Coordinate(i, j);
-            this.open = [new Node(this.avatar).parent()];
+            this.open = [new Node(this.avatar).addParent()];
         }
         return coord;
     }
@@ -169,7 +213,7 @@ class Terrain {
             this.open.forEach(open => {
                 open.goal(this.routes[0])
             });
-            this.open.sort((a, b) => a.isLessThan(b));
+            this.open.sort((a, b) => a.isLessThan(b) ? -1 : 1);
         }
     }
 
@@ -178,38 +222,69 @@ class Terrain {
             throw new Error(messages.error.noGoalsSet);
         }
 
-        let node = this.open.splice(0, 1)[0];
-        this.closed.push(node);
-        this.avatar = node.coord;
-        if (node.h > 0) {
-            let surroundings = node.surrounding()
-                .filter(
-                    element => element.coord.range(
-                        new Coordinate(0, 0),
-                        new Coordinate(this.height - 1, this.width - 1)
+        let solution = [this.avatar];
+
+        while (this.routes.length > 0) {
+            let node = this.open.splice(0, 1)[0];
+            this.closed.push(node);
+            this.avatar = node.coord;
+            if (node.h > 0) {
+                let surroundings = node.surrounding()
+                    // in range
+                    .filter(
+                        element => element.coord.range(
+                            new Coordinate(0, 0),
+                            new Coordinate(this.height - 1, this.width - 1)
+                        )
                     )
-                )
-                .filter(
-                    element => this.closed.findIndex(closed => element.isEqual(closed)) == -1
-                );
-            surroundings.forEach(element => {
-                element.parent(node).goal(this.routes[0]);
-                let index = this.open.findIndex(open => element.isLessThan(open));
-                if (index > -1) {
-                    this.open.splice(index, element.isEqual(this.open[index]) ? 1 : 0, element);
-                } else {
-                    this.open.push(element);
+                    // not int closed list
+                    .filter(
+                        element => this.closed.findIndex(closed => element.isEqual(closed)) == -1
+                    );
+                surroundings.forEach(element => {
+                    element.addParent(node).goal(this.routes[0]);
+                    let index = this.open.findIndex(open => element.isEqual(open));
+                    if (index > -1) {
+                        if (element.isLessThan(this.open[index])) {
+                            this.open[index]
+                                .removeParent()
+                                .addParent(node)
+                                .goal(this.routes[0])
+                                .update();
+                            this.open = this.open.sort((a, b) => a.isLessThan(b) ? -1 : 1);
+                        }
+                    } else {
+                        index = this.open.findIndex(open => element.isLessThan(open))
+                        if (index > -1) {
+                            this.open.splice(index, 0, element);
+                        } else {
+                            this.open.push(element);
+                        }
+                    }
+                });
+            } else {
+                let route = [];
+                while (node.parentNode) {
+                    node = node.parentNode;
+                    route.unshift(node.coord);
                 }
-            });
+                solution = solution.concat(route);
+                this.routes.splice(0, 1);
+                if (this.routes.length > 0) {
+                    this.open = [
+                        new Node(this.avatar)
+                        .addParent()
+                        .goal(this.routes[0])
+                    ];
+                    this.closed = this.blocks.map(block => new Node(block));
+                }
+            }
         }
 
-        this.updateMap();
-        this.print();
+        //this.updateMap();
+        //this.print();
 
-        return {
-            coord: node.coord,
-            eaten: undefined
-        };
+        return solution;
     }
 
     print() {

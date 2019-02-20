@@ -52,38 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let runStopButton = $(".setting-panel>.setting>button.run-stop");
     let interval = undefined;
     runStopButton.on("click", () => {
-        if (scene.isRunning()) {
-            scene.stop();
-            notifier.info(messages.info.programStopped);
-            runStopButton.text("Run");
-            if (interval) {
-                clearInterval(interval);
-            }
-        }
-        else {
-            try {
-                scene.run();
-                notifier.info(messages.info.programStarted);
-                runStopButton.text("Stop");
-                interval = setInterval(() => {
-                    try {
-                        scene.run();
-                        runStopButton.text("Stop");
-                    } catch (err) {
-                        notifier.error(err.message);
-                        scene.stop();
-                        runStopButton.text("Run");
-                        if (interval) {
-                            clearInterval(interval);
-                        }
-                    }
-                }, 1000);
-            } catch (err) {
-                notifier.error(err.message);
-                scene.stop();
-                runStopButton.text("Run");
-            }
-        }
+        scene.run();
     });
 
     function animate() {

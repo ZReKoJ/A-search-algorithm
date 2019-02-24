@@ -21,8 +21,10 @@
     <script src="./js/messages.js"></script>
     <!-- My own functions -->
     <script src="./js/utils.js"></script>
+    <!-- mesh -->
+    <script src="./js/mesh.js"></script>
     <!-- snake -->
-    <script src="./js/snake.js"></script>
+    <!-- <script src="./js/snake.js"></script> -->
     <!-- for drawing -->
     <script src="./js/scene.js"></script>
     <!-- a search algorithm -->
@@ -54,6 +56,7 @@
         <div class="main">
             <div class="map-panel">
                 <div class="draw-panel">
+                    <canvas></canvas>
                 </div>
                 <div class="icon-panel">
                     <div class="icons">
@@ -67,11 +70,11 @@
                         </label>
                         <label class="icon">
                             <img class="img-width-fill" src="resources/person.png">
-                            <input class="button" type="radio" name="block" value="start">
+                            <input class="button" type="radio" name="block" value="avatar">
                         </label>
                         <label class="icon">
                             <img class="img-width-fill" src="resources/flag.png">
-                            <input class="button" type="radio" name="block" value="end">
+                            <input class="button" type="radio" name="block" value="flag">
                         </label>
                     </div>
                     <div class="resizer" id='left'></div>
@@ -81,11 +84,12 @@
                 <div class="setting">
                     <input class="width" type="number" value="10" min="10" max="100">
                     <input class="height" type="number" value="10" min="10" max="100">
-                    <button class="start">Start</button>
+                    <button class="resize">Resize</button>
                     <button class="perspective">Perspective View</button>
-                    <button class="run-stop">Run</button>
-                    <input class="mouse-scroll" type="number" value="1" min="1">
-                    <input class="camera-look-at" type="number" value="1" min="1">
+                    <button class="state">Run</button>
+                    <input class="mouse-scroll" type="number" value="1" min="1" max="100">
+                    <input class="camera-look-at" type="number" value="1" min="1" max="100">
+                    <input class="image" type="file" accept="image/png, image/jpeg">
                 </div>
                 <div class="resizer" id='top'></div>
             </div>

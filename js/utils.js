@@ -187,5 +187,3 @@ class Notifier {
         }, 3000);
     }
 }
-
-var notifier = new Notifier();

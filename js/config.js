@@ -23,5 +23,12 @@ var CONFIG = {
             GOD: 0,
             PERSPECTIVE: 1
         }
+    },
+    ICON : {
+        STATE: "none",
+        NONE: "none",
+        AVATAR: "avatar",
+        FLAG: "flag",
+        BLOCK: "block"
     }
 }

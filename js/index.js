@@ -1,59 +1,22 @@
 'use strict'
 
+var notifier = new Notifier();
+var scene = new Scene();
+var meshFactory = new MeshFactory();
+
 document.addEventListener("DOMContentLoaded", () => {
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 
-    let widthInput = $(".setting-panel>.setting>input[type='number'].width");
-    let heightInput = $(".setting-panel>.setting>input[type='number'].height");
-    let mouseScrollInput = $(".setting-panel>.setting>input[type='number'].mouse-scroll");
-    let cameraLookAtInput = $(".setting-panel>.setting>input[type='number'].camera-look-at");
+    let drawFunctions = drawPanel('.draw-panel');
+    let settingFunctions = settingPanel('.setting-panel>.setting');
+    let iconsFunctions = iconPanel('.icon-panel>.icons');
 
-    mouseScrollInput.on("change", (e) => {
-        CONFIG.MOUSE_SCROLL_RELATION = Number(mouseScrollInput.val()) * 0.1;
-    });
+    scene.init(drawFunctions.canvas)
+        .setPlane(Number(settingFunctions.width()), Number(settingFunctions.height()))
+        .setCameraMode(CONFIG.CAMERA.MODE.GOD)
+        .resize(drawFunctions.dimension.width(), drawFunctions.dimension.height());
 
-    cameraLookAtInput.on("change", (e) => {
-        CONFIG.CAMERA_LOOK_AT_RELATION = Number(cameraLookAtInput.val()) * 0.001;
-    });
-
-    let scene = new Scene('.draw-panel')
-        .setTerrain(new Terrain(Number(widthInput.val()), Number(heightInput.val())))
-        .setCameraMode(CONFIG.CAMERA.MODE.GOD);
-
-    let startButton = $(".setting-panel>.setting>button.start");
-    startButton.on("click", () => {
-        if (
-            Number(widthInput.attr("min")) <= Number(widthInput.val()) &&
-            Number(widthInput.attr("max")) >= Number(widthInput.val()) &&
-            Number(heightInput.attr("min")) <= Number(heightInput.val()) &&
-            Number(heightInput.attr("max")) >= Number(heightInput.val())
-        ) {
-            scene.resetScene().setTerrain(new Terrain(Number(widthInput.val()), Number(heightInput.val())))
-                .setCameraMode(CONFIG.CAMERA.MODE.GOD);
-            perspectiveButton.perspectiveMode("GOD")
-        } else {
-            notifier.error(messages.error.mapExceedDimensions);
-        }
-    });
-
-    let perspectiveButton = $(".setting-panel>.setting>button.perspective");
-    perspectiveButton.perspectiveMode = function (mode) {
-        let perspectiveKeys = Object.keys(CONFIG.CAMERA.MODE);
-        let perspective = perspectiveKeys[(perspectiveKeys.indexOf(mode) + 1) % perspectiveKeys.length];
-        this.text(perspective.charAt(0) + perspective.slice(1).toLowerCase() + " View");
-    }
-    perspectiveButton.on("click", () => {
-        let buttonTitle = perspectiveButton.text().split(" ")[0].toUpperCase();
-        scene.setCameraMode(CONFIG.CAMERA.MODE[buttonTitle]);
-        perspectiveButton.perspectiveMode(buttonTitle);
-    });
-
-    let runStopButton = $(".setting-panel>.setting>button.run-stop");
-    let interval = undefined;
-    runStopButton.on("click", () => {
-        scene.run();
-    });
 
     function animate() {
         requestAnimationFrame(animate);
@@ -65,9 +28,207 @@ document.addEventListener("DOMContentLoaded", () => {
     infoMessages();
 });
 
-function findIcon() {
-    return $(".icon-panel>.icons input[type='radio']:checked").val()
+function drawPanel(div) {
+    let draw = $(div);
+    let event;
+    let canvas = draw.find('canvas')[0];
+
+    let pointer = function (event) {
+        let rect = canvas.getBoundingClientRect();
+        return new Coordinate(
+            ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1,
+            -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1
+        );
+    };
+
+    new ResizeSensor(draw, () => {
+        scene.resize(draw.width(), draw.height());
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        if (e.deltaY > 0) {
+            scene.cameraBackwards();
+        } else {
+            scene.cameraForwards();
+        }
+    });
+
+    canvas.addEventListener('click', (e) => {
+        if (e.which == CONFIG.MOUSE.LEFT_BUTTON) {
+            scene.canvasClickedOn(pointer(e));
+        }
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG] = true;
+        CONFIG.MOUSE.VALUES[e.which] = true;
+        event = e;
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG]) {
+            let width = event.clientX - e.clientX;
+            let height = event.clientY - e.clientY;
+            if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
+                scene.canvasClickedOn(pointer(e));
+            } else if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
+                if (Math.abs(width) > Math.abs(height)) {
+                    scene.cameraViewRight(width);
+                } else {
+                    scene.cameraViewDown(height);
+                }
+            }
+            event = e;
+        }
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+        CONFIG.MOUSE.VALUES.fill(false);
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('mouseout', (e) => {
+        CONFIG.MOUSE.VALUES.fill(false);
+        e.preventDefault();
+    });
+
+    window.addEventListener('keydown', (e) => {
+        CONFIG.KEYBOARD.VALUES[e.which] = true;
+        Object.keys(CONFIG.KEYBOARD)
+            .filter(element => element != "VALUES")
+            .forEach(element => {
+                if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
+                    e.preventDefault();
+                    switch (element) {
+                        case 'ARROW_UP':
+                            scene.cameraViewUp();
+                            break;
+                        case 'ARROW_DOWN':
+                            scene.cameraViewDown();
+                            break;
+                        case 'ARROW_LEFT':
+                            scene.cameraViewLeft();
+                            break;
+                        case 'ARROW_RIGHT':
+                            scene.cameraViewRight();
+                            break;
+                        case 'SPACE':
+                            scene.cameraForwards();
+                            break;
+                    }
+                }
+            });
+    });
+
+    window.addEventListener('keyup', (e) => {
+        CONFIG.KEYBOARD.VALUES[e.which] = false;
+    });
+
+    return {
+        canvas: canvas,
+        dimension: {
+            width: function () {
+                return draw.width()
+            },
+            height: function () {
+                return draw.height()
+            }
+        }
+    };
 }
+
+function settingPanel(div) {
+    let setting = $(div);
+
+    let widthInput = setting.find("input[type='number'].width");
+    widthInput.on("change", (e) => {
+        widthInput.val(Math.max(widthInput.val(), widthInput.attr("min")));
+        widthInput.val(Math.min(widthInput.val(), widthInput.attr("max")));
+    });
+
+    let heightInput = setting.find("input[type='number'].height");
+    heightInput.on("change", (e) => {
+        heightInput.val(Math.max(heightInput.val(), heightInput.attr("min")));
+        heightInput.val(Math.min(heightInput.val(), heightInput.attr("max")));
+    });
+
+    let mouseScrollInput = setting.find("input[type='number'].mouse-scroll");
+    mouseScrollInput.on("change", (e) => {
+        mouseScrollInput.val(Math.max(mouseScrollInput.val(), mouseScrollInput.attr("min")));
+        mouseScrollInput.val(Math.min(mouseScrollInput.val(), mouseScrollInput.attr("max")));
+        CONFIG.MOUSE_SCROLL_RELATION = Number(mouseScrollInput.val()) * 0.1;
+    });
+
+    let cameraLookAtInput = setting.find("input[type='number'].camera-look-at");
+    cameraLookAtInput.on("change", (e) => {
+        cameraLookAtInput.val(Math.max(cameraLookAtInput.val(), cameraLookAtInput.attr("min")));
+        cameraLookAtInput.val(Math.min(cameraLookAtInput.val(), cameraLookAtInput.attr("max")));
+        CONFIG.CAMERA_LOOK_AT_RELATION = Number(cameraLookAtInput.val()) * 0.001;
+    });
+
+    let fileInput = setting.find("input[type='file'].image");
+    fileInput.on("change", (e) => {
+        let reader = new FileReader();
+        reader.onload = function () {
+            console.log(reader.result);
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+
+    let resizeButton = setting.find("button.resize");
+    resizeButton.on("click", () => {
+        perspectiveButton.text("Perspective View");
+        scene.resetScene()
+            .setPlane(widthInput.val(), heightInput.val())
+            .setCameraMode(CONFIG.CAMERA.MODE.GOD);
+    });
+
+    let perspectiveButton = setting.find("button.perspective");
+    perspectiveButton.on("click", () => {
+        switch (perspectiveButton.text()) {
+            case "God View":
+                scene.setCameraMode(CONFIG.CAMERA.MODE.GOD);
+                perspectiveButton.text("Perspective View");
+                break;
+            case "Perspective View":
+                scene.setCameraMode(CONFIG.CAMERA.MODE.PERSPECTIVE);
+                perspectiveButton.text("God View");
+                break;
+        }
+    });
+
+    let stateButton = setting.find("button.state");
+    stateButton.on("click", () => {
+        scene.run();
+    });
+
+    return {
+        width: function () {
+            return Number(widthInput.val());
+        },
+        height: function () {
+            return Number(heightInput.val());
+        }
+    };
+}
+
+function iconPanel(div) {
+    let icons = $(div);
+
+    icons.find("input[type='radio']").on("change", (e) => {
+        CONFIG.ICON.STATE = icons.find("input[type='radio']:checked").val();
+    });
+
+    return {};
+}
+
 
 function infoMessages() {
     let allInfoMessages = messages.info.uses.recursiveValues();

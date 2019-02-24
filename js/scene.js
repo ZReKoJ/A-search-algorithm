@@ -1,116 +1,113 @@
 'use strict'
 
 class Scene {
-    constructor(div) {
-        this.element = document.querySelector(div);
+    constructor() {}
 
-        new ResizeSensor(this.element, () => {
-            this.resize();
+    cameraViewUp(relation = 10) {
+        this.camera.rotation.x += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraViewDown(relation = 10) {
+        this.camera.rotation.x -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraViewRight(relation = 10) {
+        this.camera.rotation.y -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraViewLeft(relation = 10) {
+        this.camera.rotation.y += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraRotateRight(relation = 10) {
+        this.camera.rotation.z += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraRotateLeft(relation = 10) {
+        this.camera.rotation.z -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
+    }
+
+    cameraForwards() {
+        this.camera.position.x -= Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+        this.camera.position.y += Math.sin(this.camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+        this.camera.position.z -= Math.cos(this.camera.rotation.x) * Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+    }
+
+    cameraBackwards() {
+        this.camera.position.x += Math.sin(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+        this.camera.position.y -= Math.sin(this.camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
+        this.camera.position.z += Math.cos(this.camera.rotation.x) * Math.cos(this.camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
+    }
+
+    cameraToUp(relation = 10) {
+        // only if i need to
+    }
+
+    cameraToDown(relation = 10) {
+        // only if i need to
+    }
+
+    cameraToRight(relation = 10) {
+        // only if i need to
+    }
+
+    cameraToLeft(relation = 10) {
+        // only if i need to
+    }
+
+    init(canvas) {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({
+            canvas: canvas
         });
+        this.raycaster = new THREE.Raycaster();
 
-        this.init();
-        this.listeners();
+        this.width = 0;
+        this.height = 0;
 
-        this.cameraMovements = {
-            viewUp: function (camera, relation = 10) {
-                camera.rotation.x += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            viewDown: function (camera, relation = 10) {
-                camera.rotation.x -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            viewRight: function (camera, relation = 10) {
-                camera.rotation.y -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            viewLeft: function (camera, relation = 10) {
-                camera.rotation.y += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            rotateRight: function (camera, relation = 10) {
-                camera.rotation.z += Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            rotateLeft: function (camera, relation = 10) {
-                camera.rotation.z -= Math.PI * CONFIG.CAMERA_LOOK_AT_RELATION * relation;
-            },
-            forwards: function (camera) {
-                camera.position.x -= Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.y += Math.sin(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z -= Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-            },
-            backwards: function (camera) {
-                camera.position.x += Math.sin(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.y -= Math.sin(camera.rotation.x) * CONFIG.MOUSE_SCROLL_RELATION;
-                camera.position.z += Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y) * CONFIG.MOUSE_SCROLL_RELATION;
-            },
-            toUp: function (camera, relation = 10) {
-                // only if i need to
-            },
-            toDown: function (camera, relation = 10) {
-                // only if i need to
-            },
-            toRight: function (camera, relation = 10) {
-                // only if i need to
-            },
-            toLeft: function (camera, relation = 10) {
-                // only if i need to
-            }
+        this.running = false;
+
+        return this;
+    }
+
+    resize(width, height) {
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height);
+    }
+
+    setCameraMode(mode = CONFIG.CAMERA.MODE.GOD) {
+        switch (mode) {
+            case CONFIG.CAMERA.MODE.GOD:
+                this.camera.position.set(0, 0, this.height);
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                break;
+            case CONFIG.CAMERA.MODE.PERSPECTIVE:
+                this.camera.position.set(0, -this.height, this.height / 2);
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                break;
         }
+
+        this.cameraForwards();
+        this.cameraBackwards();
+
+        return this;
     }
 
     animate() {
         this.renderer.render(this.scene, this.camera);
     }
 
-    resize() {
-        let measures = this.element.getBoundingClientRect();
-        this.camera.aspect = measures.width / measures.height;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(measures.width, measures.height);
-    }
-
-    init() {
-        let measures = this.element.getBoundingClientRect();
-
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        this.renderer = new THREE.WebGLRenderer();
-        this.renderer.setSize(measures.width, measures.height);
-        this.element.append(this.renderer.domElement);
-
-        this.raycaster = new THREE.Raycaster();
-
-        this.canvas = this.renderer.domElement;
-
-        this.running = false;
-    }
-
-    setCameraMode(mode = CONFIG.CAMERA.MODE.GOD) {
-        if (this.terrain) {
-            let distance = this.terrain.height;
-            switch (mode) {
-                case CONFIG.CAMERA.MODE.GOD:
-                    this.camera.position.set(0, 0, distance);
-                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-                    break;
-                case CONFIG.CAMERA.MODE.PERSPECTIVE:
-                    this.camera.position.set(0, -distance, distance / 2);
-                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-                    break;
-            }
-        } else {
-            throw new Error(messages.error.noTerrainSet);
-        }
-
-        return this;
-    }
-
-    setTerrain(terrain) {
-        this.terrain = terrain;
+    setPlane(width, height) {
+        this.width = width;
+        this.height = height;
 
         let geometry = new THREE.PlaneGeometry(
-            this.terrain.width,
-            this.terrain.height,
-            this.terrain.width,
-            this.terrain.height
+            this.width,
+            this.height,
+            this.width,
+            this.height
         );
 
         let materials = [
@@ -122,172 +119,66 @@ class Scene {
             })
         ];
 
-        for (let i = 0; i < this.terrain.height; i++) {
-            for (let j = 0; j < this.terrain.width; j++) {
-                let index = (i * this.terrain.width + j) * 2;
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                let index = (i * this.width + j) * 2;
                 geometry.faces[index].materialIndex = geometry.faces[index + 1].materialIndex = (i + j) % 2;
             }
         }
 
+        let self = this;
+
         this.plane = new THREE.Mesh(geometry, materials);
         this.plane.name = "ground";
+        this.plane.clickListener = function (point) {
+            // the left top box is the coord 0, 0
+            // x -> column y -> row
+            point.x += this.geometry.parameters.width / 2;
+            point.y *= -1;
+            point.y += this.geometry.parameters.height / 2;
+            point.x = point.x | 0;
+            point.y = point.y | 0;
+
+            self.addObject(point.y, point.x);
+        };
 
         this.scene.add(this.plane);
 
         return this;
     }
 
-    meshClicked(name, point) {
-        switch (name) {
-            case "ground":
-                // the left top box is the coord 0, 0
-                // x -> column y -> row
-                point.x += this.terrain.width / 2;
-                point.y *= -1;
-                point.y += this.terrain.height / 2;
-                point.x = point.x | 0;
-                point.y = point.y | 0;
-                this.actionOn(point.y, point.x);
-                break;
-        }
-    }
+    addObject(i, j, name = String(CONFIG.ICON.STATE)) {
+        if (name != CONFIG.ICON.NONE) {
 
-    actionOn(i, j) {
-        try {
-            switch (findIcon()) {
-                case "block":
-                    this.addBlock(i, j);
-                    break;
-                case "start":
-                    this.setAvatar(i, j);
-                    break;
-                case "end":
-                    this.addFlag(i, j);
-                    break;
-                case "none":
-                    this.remove(i, j);
-                    break;
-            }
-        } catch (err) {
-            notifier.error(err.message);
-        }
-    }
+            let object = new THREE.Mesh(
+                meshFactory.getGeometry(name),
+                meshFactory.getMaterial(name)
+            );
+            object.name = name;
 
-    remove(i, j) {
-        if (this.isRunning() && this.terrain && this.terrain.avatar.isEqual(new Coordinate(i, j))) {
-            throw new Error(messages.error.cannotChangeAvatarWhileRunning);
-        }
+            object.position.set(
+                -this.plane.geometry.parameters.width / 2 + 0.5,
+                this.plane.geometry.parameters.height / 2 - 0.5,
+                0.5
+            );
 
-        let object = this.scene.getObjectByName(String(i + " " + j));
-        if (object) {
-            if (this.isRunning() && object.visible) {
-                throw new Error(messages.error.cannotRemoveObjectWhileRunning);
-            }
-            this.scene.remove(object);
-            this.terrain.remove(i, j);
-        }
-    }
+            object.position.x += j;
+            object.position.y -= i;
 
-    addBlock(i, j) {
-        if (!this.terrain) {
-            throw new Error(messages.error.noTerrainSet);
-        }
+            let self = this;
 
-        this.remove(i, j);
-        this.terrain.addBlock(i, j);
+            object.clickListener = function (point) {
+                this.name = CONFIG.ICON.STATE;
 
-        let object = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshBasicMaterial({
-                color: 0xffff00
-            }));
+                if (this.name != CONFIG.ICON.NONE) {
+                    this.material = meshFactory.getMaterial(this.name);
+                } else {
+                    self.scene.remove(this);
+                }
+            };
+            object.planePosition = new Coordinate(i, j);
 
-        object.name = String(i + " " + j);
-
-        object.position.set(
-            -this.plane.geometry.parameters.width / 2 + 0.5,
-            this.plane.geometry.parameters.height / 2 - 0.5,
-            0.5
-        );
-
-        object.position.x += j;
-        object.position.y -= i;
-
-        this.scene.add(object);
-
-        if (this.snake) {
-            this.snake.check(object);
-        }
-
-        return this;
-    }
-
-    setAvatar(i, j) {
-        if (!this.terrain) {
-            throw new Error(messages.error.noTerrainSet);
-        }
-
-        if (this.isRunning()) {
-            throw new Error(messages.error.cannotChangeAvatarWhileRunning);
-        }
-
-        this.remove(i, j);
-        let avatar = this.terrain.setAvatar(i, j);
-        if (avatar) {
-            this.remove(avatar.i, avatar.j);
-        }
-
-        let object = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshBasicMaterial({
-                color: 0x00ff00
-            }));
-
-        object.name = String(i + " " + j);
-
-        object.position.set(
-            -this.plane.geometry.parameters.width / 2 + 0.5,
-            this.plane.geometry.parameters.height / 2 - 0.5,
-            0.5
-        );
-
-        object.position.x += j;
-        object.position.y -= i;
-
-        this.scene.add(object);
-
-        return this;
-    }
-
-    addFlag(i, j) {
-        if (!this.terrain) {
-            throw new Error(messages.error.noTerrainSet);
-        }
-
-        this.remove(i, j);
-        this.terrain.addRoute(i, j);
-
-        let object = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshBasicMaterial({
-                color: 0xff0000
-            }));
-
-        object.name = String(i + " " + j);
-
-        object.position.set(
-            -this.plane.geometry.parameters.width / 2 + 0.5,
-            this.plane.geometry.parameters.height / 2 - 0.5,
-            0.5
-        );
-
-        object.position.x += j;
-        object.position.y -= i;
-
-        this.scene.add(object);
-
-        if (this.snake) {
-            this.snake.check(object);
+            this.scene.add(object);
         }
 
         return this;
@@ -300,150 +191,65 @@ class Scene {
         return this;
     }
 
-    isRunning() {
-        return this.running;
-    }
-
     run() {
-        if (this.terrain) {
-            this.terrain.updateMap();
-            
-            if (!this.isRunning()) {
-                this.running = true;
-                this.snake = new Snake(this.scene, this.terrain.avatar);
-                this.terrain.prepare();
+        let data = {
+            avatars: [],
+            blocks: [],
+            routes: []
+        }
+
+        let snake = [];
+
+        this.scene.children.forEach(object => {
+            switch (object.name) {
+                case CONFIG.ICON.AVATAR:
+                    data.avatars.push(object.planePosition);
+                    break;
+                case CONFIG.ICON.BLOCK:
+                    data.blocks.push(object.planePosition);
+                    break;
+                case CONFIG.ICON.FLAG:
+                    data.routes.push(object.planePosition);
+                    break;
+                case "snakeBody":
+                    snake.push(object);
+                    break;
             }
-
-            let movements = this.terrain.movement();
-            let index = 0;
-
-            let interval = setInterval(() => {
-                if (index < movements.length) {
-                    this.snake.movement(movements[index], true);
-                    this.snake.check();
-                    index++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, 1000);
-        } else {
-            throw new Error(messages.error.noTerrainSet);
-        }
-    }
-
-    stop() {
-        this.running = false;
-        if (this.snake) {
-            this.snake.destruct();
-            this.snake = undefined;
-        }
-    }
-
-    listeners() {
-        let event;
-
-        this.canvas.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
         });
 
-        this.canvas.addEventListener('wheel', (e) => {
-            if (e.deltaY > 0) {
-                this.cameraMovements.backwards(this.camera);
+        snake.forEach(element => {
+            this.scene.remove(element);
+        });
+
+        let terrain = new Terrain(this.width, this.height);
+        terrain.setData(data);
+        terrain.prepare();
+        let movements = terrain.movement();
+
+        console.log(movements);
+
+        let count = 0;
+        let interval = setInterval(() => {
+            if (count < movements.length) {
+                this.addObject(movements[count].i, movements[count].j, "snakeBody");
+                count++;
             } else {
-                this.cameraMovements.forwards(this.camera);
+                clearInterval(interval);
             }
-        });
-
-        this.canvas.addEventListener('click', (e) => {
-            if (e.which == CONFIG.MOUSE.LEFT_BUTTON) {
-                this.spaceClickListener(e);
-            }
-            e.preventDefault();
-        });
-
-        this.canvas.addEventListener('mousedown', (e) => {
-            CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG] = true;
-            CONFIG.MOUSE.VALUES[e.which] = true;
-            event = e;
-            e.preventDefault();
-        });
-
-        this.canvas.addEventListener('mousemove', (e) => {
-            if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG]) {
-                let width = event.clientX - e.clientX;
-                let height = event.clientY - e.clientY;
-                if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
-                    this.spaceClickListener(e);
-                } else if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
-                    if (Math.abs(width) > Math.abs(height)) {
-                        this.cameraMovements.viewRight(this.camera, width);
-                    } else {
-                        this.cameraMovements.viewDown(this.camera, height);
-                    }
-                }
-                event = e;
-            }
-            e.preventDefault();
-        });
-
-        this.canvas.addEventListener('mouseup', (e) => {
-            CONFIG.MOUSE.VALUES.fill(false);
-            e.preventDefault();
-        });
-
-        this.canvas.addEventListener('mouseout', (e) => {
-            CONFIG.MOUSE.VALUES.fill(false);
-            e.preventDefault();
-        });
-
-        window.addEventListener('keydown', (e) => {
-            CONFIG.KEYBOARD.VALUES[e.which] = true;
-            Object.keys(CONFIG.KEYBOARD)
-                .filter(element => element != "VALUES")
-                .forEach(element => {
-                    if (CONFIG.KEYBOARD.VALUES[CONFIG.KEYBOARD[element]]) {
-                        e.preventDefault();
-                        switch (element) {
-                            case 'ARROW_UP':
-                                this.cameraMovements.viewUp(this.camera);
-                                break;
-                            case 'ARROW_DOWN':
-                                this.cameraMovements.viewDown(this.camera);
-                                break;
-                            case 'ARROW_LEFT':
-                                this.cameraMovements.viewLeft(this.camera);
-                                break;
-                            case 'ARROW_RIGHT':
-                                this.cameraMovements.viewRight(this.camera);
-                                break;
-                            case 'SPACE':
-                                this.cameraMovements.forwards(this.camera);
-                                break;
-                        }
-                    }
-                });
-        });
-
-        window.addEventListener('keyup', (e) => {
-            CONFIG.KEYBOARD.VALUES[e.which] = false;
-        });
+        }, 1000);
     }
 
-    spaceClickListener(event) {
+    stop() {}
 
-        let mouse = new THREE.Vector2();
-        let rect = this.canvas.getBoundingClientRect();
+    canvasClickedOn(coord) {
 
-        mouse.x = ((event.clientX - rect.left) / this.canvas.clientWidth) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / this.canvas.clientHeight) * 2 + 1;
+        let mouse = new THREE.Vector2(coord.i, coord.j);
 
         this.raycaster.setFromCamera(mouse, this.camera);
-        let intersects = this.raycaster.intersectObjects([
-            this.plane
-        ]);
+        let intersects = this.raycaster.intersectObjects(this.scene.children);
 
         if (intersects.length > 0) {
-            this.meshClicked(intersects[0].object.name, intersects[0].point);
+            intersects[0].object.clickListener(intersects[0].point);
         }
     }
 }

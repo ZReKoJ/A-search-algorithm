@@ -129,7 +129,7 @@ class Node {
 }
 
 class Terrain {
-    constructor(height, width) {
+    constructor(width, height) {
         this.VALUES = Object.freeze({
             BLOCK: -2,
             AVATAR: -1,
@@ -208,6 +208,13 @@ class Terrain {
         return coord;
     }
 
+    setData(data) {
+        this.avatar = data.avatars[0];
+        this.blocks = data.blocks;
+        this.routes = data.routes;
+        this.open = [new Node(this.avatar).addParent()];
+    }
+
     prepare() {
         if (this.routes.length > 0) {
             this.open.forEach(open => {
@@ -222,7 +229,7 @@ class Terrain {
             throw new Error(messages.error.noGoalsSet);
         }
 
-        let solution = [this.avatar];
+        let solution = [];
 
         while (this.routes.length > 0) {
             let node = this.open.splice(0, 1)[0];
@@ -264,10 +271,12 @@ class Terrain {
                 });
             } else {
                 let route = [];
+                route.unshift(node.coord);
                 while (node.parentNode) {
                     node = node.parentNode;
                     route.unshift(node.coord);
                 }
+                solution.splice(solution.length - 1, 1);
                 solution = solution.concat(route);
                 this.routes.splice(0, 1);
                 if (this.routes.length > 0) {

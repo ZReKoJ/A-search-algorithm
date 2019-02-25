@@ -112,19 +112,9 @@ class Scene {
 
         let materials = [
             new THREE.MeshBasicMaterial({
-                color: 0x000000
-            }),
-            new THREE.MeshBasicMaterial({
-                color: 0xffffff
+                color: 0x222222
             })
         ];
-
-        for (let i = 0; i < this.height; i++) {
-            for (let j = 0; j < this.width; j++) {
-                let index = (i * this.width + j) * 2;
-                geometry.faces[index].materialIndex = geometry.faces[index + 1].materialIndex = (i + j) % 2;
-            }
-        }
 
         let self = this;
 
@@ -236,7 +226,7 @@ class Scene {
             } else {
                 clearInterval(interval);
             }
-        }, 1000);
+        }, CONFIG.INTERVAL_SPEED);
     }
 
     stop() {}

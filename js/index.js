@@ -173,6 +173,13 @@ function settingPanel(div) {
         CONFIG.CAMERA_LOOK_AT_RELATION = Number(cameraLookAtInput.val()) * 0.001;
     });
 
+    let speedInput = setting.find("input[type='number'].speed");
+    speedInput.on("change", (e) => {
+        speedInput.val(Math.max(speedInput.val(), speedInput.attr("min")));
+        speedInput.val(Math.min(speedInput.val(), speedInput.attr("max")));
+        CONFIG.INTERVAL_SPEED = Number(speedInput.val());
+    });
+
     let fileInput = setting.find("input[type='file'].image");
     fileInput.on("change", (e) => {
         let reader = new FileReader();

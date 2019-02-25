@@ -16,6 +16,7 @@ var CONFIG = {
         ARROW_DOWN: 40,
         SPACE: 32
     },
+    INTERVAL_SPEED: 100,
     MOUSE_SCROLL_RELATION : 0.1,
     CAMERA_LOOK_AT_RELATION: 0.001,
     CAMERA : {

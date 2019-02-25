@@ -2,6 +2,10 @@
 
 var messages = {
     error: {
+        cannotReplaceObjectWhileRunning: "You cannot replace a object when running",
+        undefinedAlgorithm: "Algorithm is not defined",
+        noAvatarsSet: "Please, set at least one avatar to begin with",
+        noRoutesSet: "Please, set at least one route to begin with"
     },
     info: {
         uses: {
@@ -13,6 +17,9 @@ var messages = {
             keyboard: {
                 arrowKeys: "Use the arrow keys to change the camera viewpoint",
                 space: "Use the space key for zoom in and ctrl + space for zoom out",
+            },
+            time : {
+                intervalLonger: "If you see the program crashes set the interval longer"
             }
         }
     }

@@ -58,8 +58,12 @@ function drawPanel(div) {
     });
 
     canvas.addEventListener('click', (e) => {
-        if (e.which == CONFIG.MOUSE.LEFT_BUTTON) {
-            scene.canvasClickedOn(pointer(e));
+        try {
+            if (e.which == CONFIG.MOUSE.LEFT_BUTTON) {
+                scene.canvasClickedOn(pointer(e));
+            }
+        } catch (err) {
+            notifier.error(err.message);
         }
         e.preventDefault();
     });
@@ -72,19 +76,23 @@ function drawPanel(div) {
     });
 
     canvas.addEventListener('mousemove', (e) => {
-        if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG]) {
-            let width = event.clientX - e.clientX;
-            let height = event.clientY - e.clientY;
-            if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
-                scene.canvasClickedOn(pointer(e));
-            } else if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
-                if (Math.abs(width) > Math.abs(height)) {
-                    scene.cameraViewRight(width);
-                } else {
-                    scene.cameraViewDown(height);
+        try {
+            if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.DRAG]) {
+                let width = event.clientX - e.clientX;
+                let height = event.clientY - e.clientY;
+                if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.LEFT_BUTTON]) {
+                    scene.canvasClickedOn(pointer(e));
+                } else if (CONFIG.MOUSE.VALUES[CONFIG.MOUSE.RIGHT_BUTTON]) {
+                    if (Math.abs(width) > Math.abs(height)) {
+                        scene.cameraViewRight(width);
+                    } else {
+                        scene.cameraViewDown(height);
+                    }
                 }
+                event = e;
             }
-            event = e;
+        } catch (err) {
+            notifier.error(err.message);
         }
         e.preventDefault();
     });
@@ -213,7 +221,12 @@ function settingPanel(div) {
 
     let stateButton = setting.find("button.state");
     stateButton.on("click", () => {
-        scene.run();
+        try {
+            scene.run();
+        } catch (err) {
+            notifier.error(err.message);
+            console.log(err);
+        }
     });
 
     return {
@@ -243,5 +256,5 @@ function infoMessages() {
         notifier.info(allInfoMessages[
             Math.floor(Math.random() * allInfoMessages.length)
         ]);
-    }, 30000);
+    }, CONFIG.SHOW_MESSAGES_INTERVAL);
 }

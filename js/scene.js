@@ -158,12 +158,16 @@ class Scene {
             let self = this;
 
             object.clickListener = function (point) {
-                this.name = CONFIG.ICON.STATE;
+                if (!self.isRunning()) {
+                    this.name = CONFIG.ICON.STATE;
 
-                if (this.name != CONFIG.ICON.NONE) {
-                    this.material = meshFactory.getMaterial(this.name);
+                    if (this.name != CONFIG.ICON.NONE) {
+                        this.material = meshFactory.getMaterial(this.name);
+                    } else {
+                        self.scene.remove(this);
+                    }
                 } else {
-                    self.scene.remove(this);
+                    throw new Error(messages.error.cannotReplaceObjectWhileRunning);
                 }
             };
             object.planePosition = new Coordinate(i, j);
@@ -172,6 +176,10 @@ class Scene {
         }
 
         return this;
+    }
+
+    isRunning() {
+        return this.running;
     }
 
     resetScene() {
@@ -183,11 +191,12 @@ class Scene {
 
     run() {
         let data = {
+            width: this.width,
+            height: this.height,
             avatars: [],
             blocks: [],
             routes: []
-        }
-
+        };
         let snake = [];
 
         this.scene.children.forEach(object => {
@@ -207,26 +216,40 @@ class Scene {
             }
         });
 
+        if (data.avatars.length < 1) {
+            throw new Error(messages.error.noAvatarsSet);
+        }
+
+        if (data.routes.length < 1) {
+            throw new Error(messages.error.noRoutesSet);
+        }
+
+        this.algorithm = new Algorithm(data);
+
+        this.running = true;
+
         snake.forEach(element => {
             this.scene.remove(element);
         });
 
-        let terrain = new Terrain(this.width, this.height);
-        terrain.setData(data);
-        terrain.prepare();
-        let movements = terrain.movement();
-
-        console.log(movements);
+        let results = this.algorithm.run();
 
         let count = 0;
         let interval = setInterval(() => {
-            if (count < movements.length) {
-                this.addObject(movements[count].i, movements[count].j, "snakeBody");
-                count++;
-            } else {
+            let finished = true;
+            results.forEach(result => {
+                if (count < result.length) {
+                    this.addObject(result[count].i, result[count].j, "snakeBody");
+                    finished = false;
+                }
+            });
+            if (finished) {
                 clearInterval(interval);
             }
+            count++;
         }, CONFIG.INTERVAL_SPEED);
+
+        this.running = false;
     }
 
     stop() {}

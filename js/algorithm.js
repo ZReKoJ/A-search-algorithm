@@ -128,6 +128,180 @@ class Node {
     }
 }
 
+class ASearch {
+    constructor(map) {
+        this.map = map;
+    }
+
+    movement(start, end) {
+        let coord = start;
+
+        this.open = [
+            new Node(coord)
+            .addParent()
+            .goal(end)
+        ];
+        this.closed = [];
+
+        let solution = [];
+
+        // Getting the first node from open list
+        let node = this.open.shift();
+
+        while (node.h > 0) {
+            // Move the node to the closed list
+            this.closed.push(node);
+            // The new position
+            this.coord = node.coord;
+            // Testing if we have reached the goal
+            let surroundings = node.surrounding()
+                // In range
+                .filter(
+                    element => element.coord.range(
+                        new Coordinate(0, 0),
+                        new Coordinate(
+                            this.map.height - 1,
+                            this.map.width - 1,
+                        )
+                    )
+                )
+                // Not in blocks list
+                .filter(
+                    element => this.map.blocks.findIndex(
+                        block => block.isEqual(element.coord)
+                    ) == -1
+                )
+                // Not in closed list
+                .filter(
+                    element => this.closed.findIndex(
+                        closed => closed.isEqual(element)
+                    ) == -1
+                )
+            surroundings.forEach(element => {
+                element
+                    .addParent(node)
+                    .goal(end);
+                let index = this.open.findIndex(
+                    open => open.isEqual(element)
+                );
+                if (index > -1) {
+                    if (element.isLessThan(this.open[index])) {
+                        this.open[index]
+                            .removeParent()
+                            .addParent(node)
+                            .goal(end)
+                            .update();
+                        this.open.sort(
+                            (a, b) => a.isLessThan(b) ? -1 : 1
+                        );
+                    }
+                } else {
+                    index = this.open.findIndex(
+                        open => element.isLessThan(open)
+                    );
+                    if (index > -1) {
+                        this.open.splice(index, 0, element);
+                    } else {
+                        this.open.push(element);
+                    }
+                }
+            });
+            node = this.open.shift();
+        }
+
+        solution.unshift(node.coord);
+        while (node.parentNode) {
+            node = node.parentNode;
+            solution.unshift(node.coord);
+        }
+
+        return solution;
+    }
+}
+
+class Algorithm {
+    constructor(data) {
+        this.width = data.width;
+        this.height = data.height;
+
+        this.VALUES = Object.freeze({
+            BLOCK: -2,
+            AVATAR: -1,
+            EMPTY: 0
+        });
+
+        this.blocks = data.blocks;
+        this.routes = data.routes;
+        this.avatars = data.avatars;
+        this.algorithms = this.avatars.map(avatar => new ASearch(this));
+
+        this.map = createArray(this.height, this.width).map(row => row.fill(this.VALUES.EMPTY));
+    }
+
+    run() {
+        let solution = new Array(this.algorithms.length).fill([]);
+
+        let count = 0;
+
+        while (count < this.routes.length) {
+
+            let routes = this.algorithms.map(
+                (algorithm, index) => algorithm.movement(
+                    count == 0 ? this.avatars[index] : this.routes[count - 1],
+                    this.routes[count]
+                )
+            );
+
+            solution.forEach((route, index) => {
+                route.splice(route.length - 1, 1);
+                solution[index] = route.concat(routes[index]);
+            });
+
+            count++;
+        }
+
+        console.log(solution)
+
+        return solution;
+    }
+
+    print() {
+        this.map.map(row => row.fill(this.VALUES.EMPTY));
+        this.avatars.forEach((avatar, index) => {
+            this.map[avatar.coord.i][avatar.coord.j] = this.VALUES.AVATAR;
+        });
+        this.routes.forEach((route, index) => {
+            this.map[route.i][route.j] = index + 1;
+        });
+        this.blocks.forEach(block => {
+            this.map[block.i][block.j] = this.VALUES.BLOCK;
+        });
+
+        console.log(
+            this.map.map(row =>
+                "|" + row.map(data => {
+                    switch (data) {
+                        case this.VALUES.EMPTY:
+                            return "   ";
+                        case this.VALUES.BLOCK:
+                            return " X ";
+                        case this.VALUES.AVATAR:
+                            return " A ";
+                        default:
+                            return (Number(Math.abs(data)) < 10 ? " " : "") +
+                                (Number(data)) +
+                                (Number(data) < 0 ? "" : " ");
+                    }
+                }).join("|") + "|"
+            ).join("\n") +
+            "\n" +
+            "avatar : " + this.blocks.map(avatar => avatar.toString()).join(", ") + "\n" +
+            "blocks : " + this.blocks.map(block => block.toString()).join(", ") + "\n" +
+            "routes : " + this.routes.map(route => route.toString()).join(", ") + "\n"
+        );
+    }
+}
+
 class Terrain {
     constructor(width, height) {
         this.VALUES = Object.freeze({
@@ -167,49 +341,8 @@ class Terrain {
         });
     }
 
-    remove(i, j) {
-        let coord = new Coordinate(i, j);
-        this.blocks = this.blocks.filter(block => !coord.isEqual(block));
-        this.routes = this.routes.filter(route => !coord.isEqual(route));
-        this.closed = this.closed.filter(closed => !(new Coordinate(coord).isEqual(closed)));
-        if (this.avatar && coord.isEqual(this.avatar)) {
-            this.avatar = undefined;
-        }
-    }
-
-    addBlock(i, j) {
-        if (0 <= i && i < this.height && 0 <= j && j < this.width) {
-            let coord = new Coordinate(i, j);
-            let index = this.blocks.findIndex(block => coord.isEqual(block));
-            if (index == -1) {
-                this.blocks.push(coord);
-            }
-            let node = new Node(coord);
-            index = this.closed.findIndex(closed => node.isEqual(closed));
-            if (index == -1) {
-                this.closed.push(node);
-            }
-        }
-    }
-
-    addRoute(i, j) {
-        if (0 <= i && i < this.height && 0 <= j && j < this.width) {
-            this.routes.push(new Coordinate(i, j));
-        }
-    }
-
-    setAvatar(i, j) {
-        let coord = undefined;
-        if (0 <= i && i < this.height && 0 <= j && j < this.width) {
-            coord = this.avatar;
-            this.avatar = new Coordinate(i, j);
-            this.open = [new Node(this.avatar).addParent()];
-        }
-        return coord;
-    }
-
     setData(data) {
-        this.avatar = data.avatars[0];
+        this.avatar = data.avatars[0].coord;
         this.blocks = data.blocks;
         this.routes = data.routes;
         this.open = [new Node(this.avatar).addParent()];

@@ -55,14 +55,17 @@ class Node {
         this.g = 0;
         this.h = undefined;
         this.f = undefined;
+        this.index = 0;
     }
 
     addParent(parent) {
         if (parent) {
+            this.index = parent.index + 1;
             this.parentNode = parent;
             this.parentNode.addChild(this);
             this.g = Number(this.coord.distanceTo(this.parentNode.coord) + this.parentNode.g);
         } else {
+            this.index = 0;
             this.g = 0;
         }
         return this;
@@ -129,12 +132,14 @@ class Node {
 }
 
 class ASearch {
-    constructor(map) {
+    constructor(map, index) {
+        this.index = index;
         this.map = map;
     }
 
     movement(start, end) {
         let coord = start;
+        let i = this.map.solution[this.index].length;
 
         this.open = [
             new Node(coord)
@@ -148,7 +153,7 @@ class ASearch {
         // Getting the first node from open list
         let node = this.open.shift();
 
-        while (node.h > 0) {
+        while (node && node.h > 0) {
             // Move the node to the closed list
             this.closed.push(node);
             // The new position
@@ -181,41 +186,68 @@ class ASearch {
                 element
                     .addParent(node)
                     .goal(end);
-                let index = this.open.findIndex(
-                    open => open.isEqual(element)
-                );
-                if (index > -1) {
-                    if (element.isLessThan(this.open[index])) {
-                        this.open[index]
-                            .removeParent()
-                            .addParent(node)
-                            .goal(end)
-                            .update();
-                        this.open.sort(
-                            (a, b) => a.isLessThan(b) ? -1 : 1
-                        );
+
+                let collision = !this.map.solution.every(
+                    (sol, index) => {
+                        if (index < this.index) {
+                            if (sol[i + element.index]) {
+                                return !sol[i + element.index].isEqual(element.coord);
+                            } else {
+                                return true;
+                            }
+                        } else if (index == this.index) {
+                            return true;
+                        } else {
+                            if (sol[i + element.index - 1]) {
+                                return !sol[i + element.index - 1].isEqual(element.coord);
+                            } else {
+                                return true;
+                            }
+                        }
                     }
-                } else {
-                    index = this.open.findIndex(
-                        open => element.isLessThan(open)
+                );
+
+                if (!collision) {
+                    let index = this.open.findIndex(
+                        open => open.isEqual(element)
                     );
                     if (index > -1) {
-                        this.open.splice(index, 0, element);
+                        if (element.isLessThan(this.open[index])) {
+                            this.open[index]
+                                .removeParent()
+                                .addParent(node)
+                                .goal(end)
+                                .update();
+                            this.open.sort(
+                                (a, b) => a.isLessThan(b) ? -1 : 1
+                            );
+                        }
                     } else {
-                        this.open.push(element);
+                        index = this.open.findIndex(
+                            open => element.isLessThan(open)
+                        );
+                        if (index > -1) {
+                            this.open.splice(index, 0, element);
+                        } else {
+                            this.open.push(element);
+                        }
                     }
                 }
             });
             node = this.open.shift();
         }
 
-        solution.unshift(node.coord);
-        while (node.parentNode) {
-            node = node.parentNode;
+        if (node) {
             solution.unshift(node.coord);
-        }
+            while (node.parentNode) {
+                node = node.parentNode;
+                solution.unshift(node.coord);
+            }
 
-        return solution;
+            return solution;
+        } else {
+            return undefined;
+        }
     }
 }
 
@@ -233,36 +265,36 @@ class Algorithm {
         this.blocks = data.blocks;
         this.routes = data.routes;
         this.avatars = data.avatars;
-        this.algorithms = this.avatars.map(avatar => new ASearch(this));
+        this.algorithms = this.avatars.map((avatar, index) => new ASearch(this, index));
 
         this.map = createArray(this.height, this.width).map(row => row.fill(this.VALUES.EMPTY));
     }
 
     run() {
-        let solution = new Array(this.algorithms.length).fill([]);
+        this.solution = new Array(this.algorithms.length).fill([]);
 
         let count = 0;
 
         while (count < this.routes.length) {
 
-            let routes = this.algorithms.map(
-                (algorithm, index) => algorithm.movement(
+            this.algorithms.forEach((algorithm, index) => {
+                let route = algorithm.movement(
                     count == 0 ? this.avatars[index] : this.routes[count - 1],
                     this.routes[count]
-                )
-            );
-
-            solution.forEach((route, index) => {
-                route.splice(route.length - 1, 1);
-                solution[index] = route.concat(routes[index]);
+                );
+                if (route == undefined) {
+                    throw new Error(messages.error.cannotReachGoal);
+                }
+                else {
+                    this.solution[index].pop();
+                    this.solution[index] = this.solution[index].concat(route);
+                }
             });
 
             count++;
         }
 
-        console.log(solution)
-
-        return solution;
+        return this.solution;
     }
 
     print() {
@@ -298,160 +330,6 @@ class Algorithm {
             "avatar : " + this.blocks.map(avatar => avatar.toString()).join(", ") + "\n" +
             "blocks : " + this.blocks.map(block => block.toString()).join(", ") + "\n" +
             "routes : " + this.routes.map(route => route.toString()).join(", ") + "\n"
-        );
-    }
-}
-
-class Terrain {
-    constructor(width, height) {
-        this.VALUES = Object.freeze({
-            BLOCK: -2,
-            AVATAR: -1,
-            EMPTY: 0
-        });
-
-        this.init(height, width);
-    }
-
-    init(height, width) {
-        this.width = width;
-        this.height = height;
-        this.map = createArray(height, width).map(row => row.fill(this.VALUES.EMPTY));
-
-        this.avatar = undefined;
-        this.routes = [];
-        this.blocks = [];
-
-        this.open = [];
-        this.closed = [];
-    }
-
-    updateMap() {
-        if (!this.avatar) {
-            throw new Error(messages.error.noAvatarSet);
-        }
-
-        this.map.map(row => row.fill(this.VALUES.EMPTY));
-        this.map[this.avatar.i][this.avatar.j] = this.VALUES.AVATAR;
-        this.routes.forEach((coord, index) => {
-            this.map[coord.i][coord.j] = index + 1;
-        });
-        this.blocks.forEach(block => {
-            this.map[block.i][block.j] = this.VALUES.BLOCK;
-        });
-    }
-
-    setData(data) {
-        this.avatar = data.avatars[0].coord;
-        this.blocks = data.blocks;
-        this.routes = data.routes;
-        this.open = [new Node(this.avatar).addParent()];
-    }
-
-    prepare() {
-        if (this.routes.length > 0) {
-            this.open.forEach(open => {
-                open.goal(this.routes[0])
-            });
-            this.open.sort((a, b) => a.isLessThan(b) ? -1 : 1);
-        }
-    }
-
-    movement() {
-        if (this.routes.length < 1) {
-            throw new Error(messages.error.noGoalsSet);
-        }
-
-        let solution = [];
-
-        while (this.routes.length > 0) {
-            let node = this.open.splice(0, 1)[0];
-            this.closed.push(node);
-            this.avatar = node.coord;
-            if (node.h > 0) {
-                let surroundings = node.surrounding()
-                    // in range
-                    .filter(
-                        element => element.coord.range(
-                            new Coordinate(0, 0),
-                            new Coordinate(this.height - 1, this.width - 1)
-                        )
-                    )
-                    // not int closed list
-                    .filter(
-                        element => this.closed.findIndex(closed => element.isEqual(closed)) == -1
-                    );
-                surroundings.forEach(element => {
-                    element.addParent(node).goal(this.routes[0]);
-                    let index = this.open.findIndex(open => element.isEqual(open));
-                    if (index > -1) {
-                        if (element.isLessThan(this.open[index])) {
-                            this.open[index]
-                                .removeParent()
-                                .addParent(node)
-                                .goal(this.routes[0])
-                                .update();
-                            this.open = this.open.sort((a, b) => a.isLessThan(b) ? -1 : 1);
-                        }
-                    } else {
-                        index = this.open.findIndex(open => element.isLessThan(open))
-                        if (index > -1) {
-                            this.open.splice(index, 0, element);
-                        } else {
-                            this.open.push(element);
-                        }
-                    }
-                });
-            } else {
-                let route = [];
-                route.unshift(node.coord);
-                while (node.parentNode) {
-                    node = node.parentNode;
-                    route.unshift(node.coord);
-                }
-                solution.splice(solution.length - 1, 1);
-                solution = solution.concat(route);
-                this.routes.splice(0, 1);
-                if (this.routes.length > 0) {
-                    this.open = [
-                        new Node(this.avatar)
-                        .addParent()
-                        .goal(this.routes[0])
-                    ];
-                    this.closed = this.blocks.map(block => new Node(block));
-                }
-            }
-        }
-
-        //this.updateMap();
-        //this.print();
-
-        return solution;
-    }
-
-    print() {
-        console.log(
-            this.map.map(row =>
-                "|" + row.map(data => {
-                    switch (data) {
-                        case this.VALUES.EMPTY:
-                            return " ";
-                        case this.VALUES.BLOCK:
-                            return "X";
-                        case this.VALUES.AVATAR:
-                            return "A";
-                        default:
-                            return data;
-                    }
-                }).join("|") + "|"
-            ).join("\n") +
-            "\n" +
-            "avatar : " + ((this.avatar) ? this.avatar.toString() : "") + "\n" +
-            "blocks : " + this.blocks.map(block => block.toString()).join(", ") + "\n" +
-            "routes : " + this.routes.map(route => route.toString()).join(", ") + "\n" +
-            "\n" +
-            "open   : " + this.open.map(open => "\n" + open.toString()).join(", ") + "\n" +
-            "closed  : " + this.closed.map(closed => "\n" + closed.toString()).join(", ") + "\n"
         );
     }
 }

@@ -1,5 +1,33 @@
 'use strict'
 
+class Mobile {
+    constructor(scene) {
+        this.scene = scene;
+        this.plane = this.scene.getObjectByName("ground");
+        this.object = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+        );
+        this.object.name = "mobile";
+        this.scene.add(this.object);
+    }
+
+    setPosition(coord) {
+        this.object.position.set(
+            -this.plane.geometry.parameters.width / 2 + 0.5,
+            this.plane.geometry.parameters.height / 2 - 0.5,
+            3
+        );
+
+        this.object.position.x += coord.j;
+        this.object.position.y -= coord.i;
+
+        return this;
+    }
+}
+
 class Scene {
     constructor() {}
 
@@ -112,9 +140,19 @@ class Scene {
 
         let materials = [
             new THREE.MeshBasicMaterial({
-                color: 0x222222
+                color: 0x333333
+            }),
+            new THREE.MeshBasicMaterial({
+                color: 0x111111
             })
         ];
+
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                let index = (i * this.width + j) * 2;
+                geometry.faces[index].materialIndex = geometry.faces[index + 1].materialIndex = (i + j) % 2;
+            }
+        }
 
         let self = this;
 
@@ -197,7 +235,9 @@ class Scene {
             blocks: [],
             routes: []
         };
+
         let snake = [];
+        let mobile = [];
 
         this.scene.children.forEach(object => {
             switch (object.name) {
@@ -212,6 +252,9 @@ class Scene {
                     break;
                 case "snakeBody":
                     snake.push(object);
+                    break;
+                case "mobile":
+                    mobile.push(object);
                     break;
             }
         });
@@ -231,15 +274,21 @@ class Scene {
         snake.forEach(element => {
             this.scene.remove(element);
         });
+        mobile.forEach(element => {
+            this.scene.remove(element);
+        });
 
         let results = this.algorithm.run();
+
+        let fly = results.map(element => new Mobile(this.scene).setPosition(element[0]));
 
         let count = 0;
         let interval = setInterval(() => {
             let finished = true;
-            results.forEach(result => {
+            results.forEach((result, index) => {
                 if (count < result.length) {
                     this.addObject(result[count].i, result[count].j, "snakeBody");
+                    fly[index].setPosition(result[count]);
                     finished = false;
                 }
             });

@@ -5,7 +5,8 @@ var messages = {
         cannotReplaceObjectWhileRunning: "You cannot replace a object when running",
         undefinedAlgorithm: "Algorithm is not defined",
         noAvatarsSet: "Please, set at least one avatar to begin with",
-        noRoutesSet: "Please, set at least one route to begin with"
+        noRoutesSet: "Please, set at least one route to begin with",
+        cannotReachGoal: "Cannot reach goal"
     },
     info: {
         uses: {

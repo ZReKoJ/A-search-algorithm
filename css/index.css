@@ -47,6 +47,7 @@
     justify-content: left;
     align-items: center;
     width: calc(50% - 10px);
+    min-width: 450px;
     height: 30px;
     overflow: hidden;
     margin: 0 5px 5px 5px;
@@ -68,6 +69,24 @@
 .setting-panel>.setting>.box button {
     background-color: var(--secondary-color);
     color: var(--on-secondary-color);
+}
+
+.setting-panel>.setting>.box input[type="file"] {
+    color: var(--on-primary-color);
+    font-weight: bold;
+    padding-top: 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.setting-panel>.setting>.box input[type="number"] {
+    font-weight: bold;
+    height: 80%;
+    padding: 0 5px 0 5px;
+    border: none;
+    flex-grow: 100;
+    color: var(--on-secondary-color);
+    background-color: var(--secondary-color);
 }
 
 .setting-panel>.setting::-webkit-scrollbar {

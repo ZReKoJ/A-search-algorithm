@@ -4,7 +4,7 @@ var notifier = new Notifier();
 var scene = new Scene();
 var meshFactory = new MeshFactory();
 
-document.addEventListener("DOMContentLoaded", () => {
+$(() => {
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 

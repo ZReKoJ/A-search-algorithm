@@ -12,30 +12,38 @@ class MeshFactory {
             flag: function () {
                 return new THREE.BoxGeometry(1, 1, 1);
             },
-            snakeBody: function () {
+            path: function () {
                 return new THREE.SphereGeometry(0.5, 32, 32);
+            },
+            mobile: function () {
+                return new THREE.BoxGeometry(1, 1, 1);
             }
         };
 
         this.material = {
-            avatar: function () {
+            avatar: function (color = 0x00ff00) {
                 return new THREE.MeshBasicMaterial({
-                    color: 0x00ff00
+                    color: color
                 });
             },
-            block: function () {
+            block: function (color = 0xff0000) {
                 return new THREE.MeshBasicMaterial({
-                    color: 0xffff00
+                    color: color
                 });
             },
-            flag: function () {
+            flag: function (color = 0xffff00) {
                 return new THREE.MeshBasicMaterial({
-                    color: 0xff0000
+                    color: color
                 });
             },
-            snakeBody: function () {
+            path: function (color = 0x00fff0) {
                 return new THREE.MeshBasicMaterial({
-                    color: 0x00fff0
+                    color: color
+                });
+            },
+            mobile: function (color) {
+                return new THREE.MeshBasicMaterial({
+                    color: color
                 });
             }
         };
@@ -45,7 +53,11 @@ class MeshFactory {
         return this.geometry[name]();
     }
 
-    getMaterial(name) {
-        return this.material[name]();
+    getMaterial(name, color) {
+        if (color) {
+            return this.material[name](color);
+        } else {
+            return this.material[name]();
+        }
     }
 }

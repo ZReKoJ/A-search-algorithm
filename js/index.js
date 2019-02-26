@@ -225,6 +225,7 @@ function settingPanel(div) {
             scene.run();
         } catch (err) {
             notifier.error(err.message);
+            console.log(err)
         }
     });
 

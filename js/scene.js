@@ -2,19 +2,32 @@
 
 class Mobile {
     constructor(scene) {
+        this.color = Number("0x" + Math.random().toString(16).slice(2, 8));
         this.scene = scene;
         this.plane = this.scene.getObjectByName("ground");
         this.object = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshBasicMaterial({
-                color: 0xffffff
-            })
+            meshFactory.getGeometry("mobile"),
+            meshFactory.getMaterial("mobile", this.color)
         );
         this.object.name = "mobile";
         this.scene.add(this.object);
     }
 
     setPosition(coord) {
+        let object = new THREE.Mesh(
+            meshFactory.getGeometry("path"),
+            meshFactory.getMaterial("path", this.color)
+        );
+
+        object.position.set(
+            -this.plane.geometry.parameters.width / 2 + 0.5,
+            this.plane.geometry.parameters.height / 2 - 0.5,
+            0.5
+        );
+
+        object.position.x += coord.j;
+        object.position.y -= coord.i;
+
         this.object.position.set(
             -this.plane.geometry.parameters.width / 2 + 0.5,
             this.plane.geometry.parameters.height / 2 - 0.5,
@@ -23,6 +36,8 @@ class Mobile {
 
         this.object.position.x += coord.j;
         this.object.position.y -= coord.i;
+
+        this.scene.add(object);
 
         return this;
     }
@@ -280,15 +295,14 @@ class Scene {
 
         let results = this.algorithm.run();
 
-        let fly = results.map(element => new Mobile(this.scene).setPosition(element[0]));
+        let mobiles = results.map(element => new Mobile(this.scene).setPosition(element[0]));
 
         let count = 0;
         let interval = setInterval(() => {
             let finished = true;
             results.forEach((result, index) => {
                 if (count < result.length) {
-                    this.addObject(result[count].i, result[count].j, "snakeBody");
-                    fly[index].setPosition(result[count]);
+                    mobiles[index].setPosition(result[count]);
                     finished = false;
                 }
             });

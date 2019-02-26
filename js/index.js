@@ -199,7 +199,7 @@ function settingPanel(div) {
 
     let resizeButton = setting.find("button.resize");
     resizeButton.on("click", () => {
-        perspectiveButton.text("Perspective View");
+        perspectiveButton.text("Vista Perspectiva");
         scene.resetScene()
             .setPlane(widthInput.val(), heightInput.val())
             .setCameraMode(CONFIG.CAMERA.MODE.GOD);
@@ -208,13 +208,13 @@ function settingPanel(div) {
     let perspectiveButton = setting.find("button.perspective");
     perspectiveButton.on("click", () => {
         switch (perspectiveButton.text()) {
-            case "God View":
+            case "Vista Aérea":
                 scene.setCameraMode(CONFIG.CAMERA.MODE.GOD);
-                perspectiveButton.text("Perspective View");
+                perspectiveButton.text("Vista Perspectiva");
                 break;
-            case "Perspective View":
+            case "Vista Perspectiva":
                 scene.setCameraMode(CONFIG.CAMERA.MODE.PERSPECTIVE);
-                perspectiveButton.text("God View");
+                perspectiveButton.text("Vista Aérea");
                 break;
         }
     });
@@ -223,19 +223,19 @@ function settingPanel(div) {
     stateButton.on("click", () => {
         try {
             switch (stateButton.text()) {
-                case "Run":
-                    stateButton.text("Stop");
+                case "Ejecutar":
+                    stateButton.text("Parar");
                     scene.run(() => {
-                        stateButton.text("Run");
+                        stateButton.text("Ejecutar");
                     });
                     break;
-                case "Stop":
-                    stateButton.text("Run");
+                case "Parar":
+                    stateButton.text("Ejecutar");
                     scene.stop();
                     break;
             }
         } catch (err) {
-            stateButton.text("Run");
+            stateButton.text("Ejecutar");
             notifier.error(err.message);
             console.log(err)
         }

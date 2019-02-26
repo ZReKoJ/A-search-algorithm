@@ -222,8 +222,20 @@ function settingPanel(div) {
     let stateButton = setting.find("button.state");
     stateButton.on("click", () => {
         try {
-            scene.run();
+            switch (stateButton.text()) {
+                case "Run":
+                    stateButton.text("Stop");
+                    scene.run(() => {
+                        stateButton.text("Run");
+                    });
+                    break;
+                case "Stop":
+                    stateButton.text("Run");
+                    scene.stop();
+                    break;
+            }
         } catch (err) {
+            stateButton.text("Run");
             notifier.error(err.message);
             console.log(err)
         }

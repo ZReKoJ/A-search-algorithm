@@ -19,6 +19,8 @@ class Mobile {
             meshFactory.getMaterial("path", this.color)
         );
 
+        object.name = "path";
+
         object.position.set(
             -this.plane.geometry.parameters.width / 2 + 0.5,
             this.plane.geometry.parameters.height / 2 - 0.5,
@@ -242,80 +244,102 @@ class Scene {
         return this;
     }
 
-    run() {
-        let data = {
-            width: this.width,
-            height: this.height,
-            avatars: [],
-            blocks: [],
-            routes: []
-        };
-
-        let snake = [];
-        let mobile = [];
-
+    removeByName(name) {
+        let objects = []
         this.scene.children.forEach(object => {
-            switch (object.name) {
-                case CONFIG.ICON.AVATAR:
-                    data.avatars.push(object.planePosition);
-                    break;
-                case CONFIG.ICON.BLOCK:
-                    data.blocks.push(object.planePosition);
-                    break;
-                case CONFIG.ICON.FLAG:
-                    data.routes.push(object.planePosition);
-                    break;
-                case "snakeBody":
-                    snake.push(object);
-                    break;
-                case "mobile":
-                    mobile.push(object);
-                    break;
+            if (object.name == name) {
+                objects.push(object);
             }
         });
-
-        if (data.avatars.length < 1) {
-            throw new Error(messages.error.noAvatarsSet);
-        }
-
-        if (data.routes.length < 1) {
-            throw new Error(messages.error.noRoutesSet);
-        }
-
-        this.algorithm = new Algorithm(data);
-
-        this.running = true;
-
-        snake.forEach(element => {
-            this.scene.remove(element);
+        objects.forEach(object => {
+            this.scene.remove(object);
         });
-        mobile.forEach(element => {
-            this.scene.remove(element);
-        });
-
-        let results = this.algorithm.run();
-
-        let mobiles = results.map(element => new Mobile(this.scene).setPosition(element[0]));
-
-        let count = 0;
-        let interval = setInterval(() => {
-            let finished = true;
-            results.forEach((result, index) => {
-                if (count < result.length) {
-                    mobiles[index].setPosition(result[count]);
-                    finished = false;
-                }
-            });
-            if (finished) {
-                clearInterval(interval);
-            }
-            count++;
-        }, CONFIG.INTERVAL_SPEED);
-
-        this.running = false;
     }
 
-    stop() {}
+    run(callback) {
+        if (!this.running) {
+            let data = {
+                width: this.width,
+                height: this.height,
+                avatars: [],
+                blocks: [],
+                routes: []
+            };
+
+            let path = [];
+            let mobile = [];
+
+            this.scene.children.forEach(object => {
+                switch (object.name) {
+                    case CONFIG.ICON.AVATAR:
+                        data.avatars.push(object.planePosition);
+                        break;
+                    case CONFIG.ICON.BLOCK:
+                        data.blocks.push(object.planePosition);
+                        break;
+                    case CONFIG.ICON.FLAG:
+                        data.routes.push(object.planePosition);
+                        break;
+                    case "path":
+                        path.push(object);
+                        break;
+                    case "mobile":
+                        mobile.push(object);
+                        break;
+                }
+            });
+
+            path.forEach(object => {
+                this.scene.remove(object);
+            });
+
+            mobile.forEach(object => {
+                this.scene.remove(object);
+            });
+
+            if (data.avatars.length < 1) {
+                throw new Error(messages.error.noAvatarsSet);
+            }
+
+            if (data.routes.length < 1) {
+                throw new Error(messages.error.noRoutesSet);
+            }
+
+            this.algorithm = new Algorithm(data);
+
+            this.running = true;
+
+            let results = this.algorithm.run();
+
+            let mobiles = results.map(element => new Mobile(this.scene).setPosition(element[0]));
+
+            let count = 0;
+            this.interval = setInterval(() => {
+                let finished = true;
+                results.forEach((result, index) => {
+                    if (count < result.length) {
+                        mobiles[index].setPosition(result[count]);
+                        finished = false;
+                    }
+                });
+                if (finished) {
+                    clearInterval(this.interval);
+                    this.running = false;
+                    callback();
+                }
+                count++;
+            }, CONFIG.INTERVAL_SPEED);
+        }
+    }
+
+    stop() {
+        if (this.running) {
+            clearInterval(this.interval);
+            this.removeByName("path");
+            this.removeByName("mobile");
+            this.running = false;
+        }
+    }
 
     canvasClickedOn(coord) {
 

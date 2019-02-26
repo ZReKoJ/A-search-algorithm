@@ -1,19 +1,14 @@
 'use strict'
 
 $(() => {
-    var converter = new showdown.Converter();
-
-    let text = '# hello, markdown!';
-
-    let html = converter.makeHtml(text);
-
-    $('.main').append($(html));
-
+    let converter = new showdown.Converter();
     $.ajax({
         url: '../md/doc.md',
         dataType: 'text',
         success: function (data) {
-            alert(data)
+            $('.main').append($(
+                converter.makeHtml(data)
+            ));
         }
     });
 });

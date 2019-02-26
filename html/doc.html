@@ -4,15 +4,10 @@
 <head>
     <title>A Search Algorithm</title>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="../css/bootstrap.min.css" />
     <link rel="stylesheet" href="../css/utils.css" />
     <link rel="stylesheet" href="../css/header.css" />
     <link rel="stylesheet" href="../css/doc.css" />
-    <!-- JQuery -->
-    <script src="../js/jquery-3.3.1.min.js"></script>
-    <!-- For markdown -->
-    <script src="../js/showdown.min.js"></script>
-    <!-- Doc -->
-    <script src="../js/doc.js"></script>
 </head>
 
 <body>
@@ -25,7 +20,12 @@
                     <li>
                         <a href="./doc.html">Documentación &#65516</a>
                         <ul class="hidden-menu">
-                            <li><a href="./doc.html#algo">Algo</a></li>
+                            <li><a href="./doc.html#description">Descripción</a></li>
+                            <li><a href="./doc.html#contributors">Integrantes</a></li>
+                            <li><a href="./doc.html#comments">Comentarios</a></li>
+                            <li><a href="./doc.html#views">Vistas</a></li>
+                            <li><a href="./doc.html#resources">Recursos</a></li>
+                            <li><a href="./doc.html#tools">Herramientas</a></li>
                         </ul>
                     </li>
                     <li><a href="https://zrekoj.github.io/CV/">Zihao</a></li>
@@ -33,6 +33,87 @@
             </div>
         </div>
         <div class="main">
+            <h1 align="center">Algoritmo A estrella</h1>
+            <p align="center"><a href="https://github.com/ZReKoJ/A-search-algorithm">Repositorio github</a></p>
+            <h2 id="description" align="center">Descripción</h2>
+            <div class="list-group">
+                <p class="list-group-item">Se trata de una aplicación que simula un algoritmo A estrella</p>
+            </div>
+            <h2 id="contributors" align="center">Integrantes</h2>
+            <ul class="list-group">
+                <li class="list-group-item">Zihao Hong</li>
+            </ul>
+            <h2 id="comments" align="center">Comentarios</h2>
+            <div class="list-group">
+                <p class="list-group-item">Se trata de una aplicación que simula un algoritmo A estrella</p>
+            </div>
+            <h2 id="views" align="center">Vistas</h2>
+            <div class="list-group">
+                <a target="_blank" target="_blank" id="program" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-1">Program</h4>
+                    </div>
+                    <div style="margin-top:20px">
+                        <p> Es la página para la ejecución</p>
+                    </div>
+                </a>
+                <a target="_blank" target="_blank" id="doc" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-1">Documentación</h4>
+                    </div>
+                    <div style="margin-top:20px">
+                        <p> Se trata de ésta página. </p>
+                    </div>
+                </a>
+            </div>
+            <h2 id="resources" align="center">Recursos</h2>
+            <div class="list-group">
+                <a target="_blank" href="https://threejs.org/" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Three js</h5>
+                        <small class="text-muted">Librería javascript para modelado en 3D</small>
+                    </div>
+                    <p class="mb-1">Es la librería que se usa en el proyecto dibujar objetos en 3D.</p>
+                    <small class="text-muted">Click para redirigir a la página</small>
+                </a>
+                <a target="_blank" href="https://github.com/flowkey/resize-sensor" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Resize sensor</h5>
+                        <small class="text-muted">Librería javascript controlar si se ha cambiado de dimensión un
+                            elemento</small>
+                    </div>
+                    <p class="mb-1">Es la librería que se usa en el proyecto para saber si el canvas ha cambiado de
+                        dimensión.</p>
+                    <small class="text-muted">Click para redirigir a la página</small>
+                </a>
+                <a target="_blank" href="https://getbootstrap.com/" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Bootstrap</h5>
+                        <small class="text-muted">Librería de .css</small>
+                    </div>
+                    <p class="mb-1">Es la librería que se usa en el proyecto para la presentación de la documentación.</p>
+                    <small class="text-muted">Click para redirigir a la página</small>
+                </a>
+                <a target="_blank" href="https://code.jquery.com/jquery-3.1.1.min.js" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">JQuery</h5>
+                        <small class="text-muted">librería javascript para simplificar la aplicación de comportamientos</small>
+                    </div>
+                    <p class="mb-1">Se usa para simplificar.</p>
+                    <small class="text-muted">Click para redirigir a la página</small>
+                </a>
+            </div>
+            <h2 id="tools" align="center">Herramientas</h2>
+            <div class="list-group">
+                <a target="_blank" href="https://github.com/" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">GitHub</h5>
+                        <small class="text-muted">Repositorio de la aplicación</small>
+                    </div>
+                    <p class="mb-1">Lugar donde se guarda la aplicación y para el gestión del proyecto.</p>
+                    <small class="text-muted">Click para redirigir a la página</small>
+                </a>
+            </div>
         </div>
     </div>
 </body>

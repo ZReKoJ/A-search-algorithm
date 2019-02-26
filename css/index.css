@@ -42,6 +42,34 @@
     overflow-y: auto;
 }
 
+.setting-panel>.setting>.box {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    width: calc(50% - 10px);
+    height: 30px;
+    overflow: hidden;
+    margin: 0 5px 5px 5px;
+}
+
+.setting-panel>.setting>.box * {
+    height: 30px;
+}
+
+.setting-panel>.setting>.box label {
+    margin-right: 3px;
+    color: var(--on-primary-color);
+}
+
+.setting-panel>.setting>.box .space {
+    width: 5px;
+}
+
+.setting-panel>.setting>.box button {
+    background-color: var(--secondary-color);
+    color: var(--on-secondary-color);
+}
+
 .setting-panel>.setting::-webkit-scrollbar {
     width: 10px;
 }

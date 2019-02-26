@@ -87,15 +87,43 @@
             </div>
             <div class="setting-panel">
                 <div class="setting">
-                    <input class="width" type="number" value="20" min="10" max="100">
-                    <input class="height" type="number" value="20" min="10" max="100">
-                    <button class="resize">Resize</button>
-                    <button class="perspective">Perspective View</button>
-                    <button class="state">Run</button>
-                    <input class="mouse-scroll" type="number" value="1" min="1" max="100">
-                    <input class="camera-look-at" type="number" value="1" min="1" max="100">
-                    <input class="image" type="file" accept="image/png, image/jpeg">
-                    <input class="speed" type="number" value="100" min="100" max="100000">
+                    <div class="box">
+                        <div>
+                            <label>Width</label>
+                            <input class="width" type="number" value="20" min="10" max="100">
+                        </div>
+                        <div class="space"></div>
+                        <div>
+                            <label>Height</label>
+                            <input class="height" type="number" value="20" min="10" max="100">
+                        </div>
+                    </div>
+                    <div class="box">
+                        <button class="button resize">Resize</button>
+                        <div class="space"></div>
+                        <button class="button perspective">Perspective View</button>
+                        <div class="space"></div>
+                        <button class="button state">Run</button>
+                    </div>
+                    <div class="box">
+                        <div>
+                            <label>Zoom</label>
+                            <input class="mouse-scroll" type="number" value="1" min="1" max="100">
+                        </div>
+                        <div class="space"></div>
+                        <div>
+                            <label>Transition</label>
+                            <input class="camera-look-at" type="number" value="1" min="1" max="100">
+                        </div>
+                        <div class="space"></div>
+                        <div>
+                            <label>Speed</label>
+                            <input class="speed" type="number" value="100" min="100" max="100000">
+                        </div>
+                    </div>
+                    <div class="box">
+                        <input class="image" type="file" accept="image/png, image/jpeg">
+                    </div>
                 </div>
                 <div class="resizer" id='top'></div>
             </div>

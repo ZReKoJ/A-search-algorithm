@@ -1,16 +1,16 @@
 'use strict'
 
 class Mobile {
-    constructor(scene) {
+    constructor(view) {
         this.color = Number("0x" + Math.random().toString(16).slice(2, 8));
-        this.scene = scene;
-        this.plane = this.scene.getObjectByName("ground");
+        this.view = view;
         this.object = new THREE.Mesh(
             meshFactory.getGeometry("mobile"),
             meshFactory.getMaterial("mobile", this.color)
         );
         this.object.name = "mobile";
-        this.scene.add(this.object);
+        this.object.clickListener = function (point) {};
+        this.view.scene.add(this.object);
     }
 
     setPosition(coord) {
@@ -22,24 +22,42 @@ class Mobile {
         object.name = "path";
 
         object.position.set(
-            -this.plane.geometry.parameters.width / 2 + 0.5,
-            this.plane.geometry.parameters.height / 2 - 0.5,
+            -this.view.width / 2 + 0.5,
+            this.view.height / 2 - 0.5,
             0.5
         );
 
         object.position.x += coord.j;
         object.position.y -= coord.i;
 
+        let self = this.view;
+
+        object.clickListener = function (point) {
+            if (!self.isRunning()) {
+                this.name = CONFIG.ICON.STATE;
+
+                if (this.name != CONFIG.ICON.NONE) {
+                    this.geometry = meshFactory.getGeometry(this.name);
+                    this.material = meshFactory.getMaterial(this.name);
+                } else {
+                    self.scene.remove(this);
+                }
+            } else {
+                throw new Error(messages.error.cannotReplaceObjectWhileRunning);
+            }
+        };
+        object.planePosition = coord;
+
         this.object.position.set(
-            -this.plane.geometry.parameters.width / 2 + 0.5,
-            this.plane.geometry.parameters.height / 2 - 0.5,
+            -this.view.width / 2 + 0.5,
+            this.view.height / 2 - 0.5,
             3
         );
 
         this.object.position.x += coord.j;
         this.object.position.y -= coord.i;
 
-        this.scene.add(object);
+        this.view.scene.add(object);
 
         return this;
     }
@@ -217,6 +235,7 @@ class Scene {
                     this.name = CONFIG.ICON.STATE;
 
                     if (this.name != CONFIG.ICON.NONE) {
+                        this.geometry = meshFactory.getGeometry(this.name);
                         this.material = meshFactory.getMaterial(this.name);
                     } else {
                         self.scene.remove(this);
@@ -315,7 +334,7 @@ class Scene {
 
             let results = this.algorithm.run();
 
-            let mobiles = results.map(element => new Mobile(this.scene).setPosition(element[0]));
+            let mobiles = results.map(element => new Mobile(this).setPosition(element[0]));
 
             let count = 0;
             this.interval = setInterval(() => {

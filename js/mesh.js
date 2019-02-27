@@ -34,7 +34,7 @@ class MeshFactory {
                     color: color
                 });
             },
-            flag: function (color = 0xffff00) {
+            flag: function (color = 0xffffff) {
                 return new THREE.MeshBasicMaterial({
                     color: color
                 });
@@ -49,7 +49,7 @@ class MeshFactory {
                     color: color
                 });
             },
-            danger: function (color = 0xfffff0) {
+            danger: function (color = 0xffff00) {
                 return new THREE.MeshBasicMaterial({
                     color: color
                 });

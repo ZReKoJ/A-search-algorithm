@@ -128,7 +128,11 @@ function drawPanel(div) {
                             scene.cameraViewRight();
                             break;
                         case 'SPACE':
-                            scene.cameraForwards();
+                            if (e.ctrlKey) {
+                                scene.cameraBackwards();
+                            } else {
+                                scene.cameraForwards();
+                            }
                             break;
                     }
                 }

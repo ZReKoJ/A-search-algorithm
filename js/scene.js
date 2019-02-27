@@ -330,11 +330,11 @@ class Scene {
 
             this.algorithm = new Algorithm(data);
 
-            this.running = true;
-
             let results = this.algorithm.run();
 
             let mobiles = results.map(element => new Mobile(this).setPosition(element[0]));
+
+            this.running = true;
 
             let count = 0;
             this.interval = setInterval(() => {

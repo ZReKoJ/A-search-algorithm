@@ -56,6 +56,8 @@ class Node {
         this.h = undefined;
         this.f = undefined;
         this.index = 0;
+
+        this.danger = 0;
     }
 
     addParent(parent) {
@@ -63,7 +65,7 @@ class Node {
             this.index = parent.index + 1;
             this.parentNode = parent;
             this.parentNode.addChild(this);
-            this.g = Number(this.coord.distanceTo(this.parentNode.coord) + this.parentNode.g);
+            this.g = Number(this.coord.distanceTo(this.parentNode.coord) + this.parentNode.g + this.danger);
         } else {
             this.index = 0;
             this.g = 0;
@@ -182,6 +184,17 @@ class ASearch {
                         closed => closed.isEqual(element)
                     ) == -1
                 )
+                // If in danger
+                .map(
+                    element => {
+                        if (this.map.dangers.findIndex(
+                                danger => danger.isEqual(element.coord)
+                            ) > -1) {
+                            element.danger = CONFIG.DANGER_RATE;
+                        }
+                        return element;
+                    }
+                )
             surroundings.forEach(element => {
                 element
                     .addParent(node)
@@ -265,6 +278,7 @@ class Algorithm {
         this.blocks = data.blocks;
         this.routes = data.routes;
         this.avatars = data.avatars;
+        this.dangers = data.dangers;
         this.algorithms = this.avatars.map((avatar, index) => new ASearch(this, index));
 
         this.map = createArray(this.height, this.width).map(row => row.fill(this.VALUES.EMPTY));
@@ -284,8 +298,7 @@ class Algorithm {
                 );
                 if (route == undefined) {
                     throw new Error(messages.error.cannotReachGoal);
-                }
-                else {
+                } else {
                     this.solution[index].pop();
                     this.solution[index] = this.solution[index].concat(route);
                 }

@@ -263,7 +263,8 @@ class Scene {
                 height: this.height,
                 avatars: [],
                 blocks: [],
-                routes: []
+                routes: [],
+                dangers: []
             };
 
             let path = [];
@@ -279,6 +280,9 @@ class Scene {
                         break;
                     case CONFIG.ICON.FLAG:
                         data.routes.push(object.planePosition);
+                        break;
+                    case CONFIG.ICON.DANGER:
+                        data.dangers.push(object.planePosition);
                         break;
                     case "path":
                         path.push(object);
@@ -316,16 +320,30 @@ class Scene {
             let count = 0;
             this.interval = setInterval(() => {
                 let finished = true;
-                results.forEach((result, index) => {
-                    if (count < result.length) {
-                        mobiles[index].setPosition(result[count]);
-                        finished = false;
+                try {
+                    results.forEach((result, index) => {
+                        if (count < result.length) {
+                            if (data.dangers.findIndex(
+                                    danger => danger.isEqual(result[count])
+                                ) > 1) {
+                                let broken = Math.floor(Math.random() * 100);
+                                if (broken < CONFIG.DANGER_RATE) {
+                                    throw new Error(messages.error.dangerZoneTouch);
+                                }
+                            }
+                            mobiles[index].setPosition(result[count]);
+                            finished = false;
+                        }
+                    });
+                } catch (err) {
+                    finished = true;
+                    notifier.error(err.message);
+                } finally {
+                    if (finished) {
+                        clearInterval(this.interval);
+                        this.running = false;
+                        callback();
                     }
-                });
-                if (finished) {
-                    clearInterval(this.interval);
-                    this.running = false;
-                    callback();
                 }
                 count++;
             }, CONFIG.INTERVAL_SPEED);

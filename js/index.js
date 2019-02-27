@@ -188,6 +188,13 @@ function settingPanel(div) {
         CONFIG.INTERVAL_SPEED = Number(speedInput.val());
     });
 
+    let dangerInput = setting.find("input[type='number'].danger");
+    dangerInput.on("change", (e) => {
+        dangerInput.val(Math.max(dangerInput.val(), dangerInput.attr("min")));
+        dangerInput.val(Math.min(dangerInput.val(), dangerInput.attr("max")));
+        CONFIG.DANGER_RATE = Number(dangerInput.val());
+    });
+
     let fileInput = setting.find("input[type='file'].image");
     fileInput.on("change", (e) => {
         let reader = new FileReader();

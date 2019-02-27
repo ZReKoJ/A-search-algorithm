@@ -17,6 +17,9 @@ class MeshFactory {
             },
             mobile: function () {
                 return new THREE.BoxGeometry(1, 1, 1);
+            },
+            danger: function () {
+                return new THREE.BoxGeometry(1, 1, 1);
             }
         };
 
@@ -42,6 +45,11 @@ class MeshFactory {
                 });
             },
             mobile: function (color) {
+                return new THREE.MeshBasicMaterial({
+                    color: color
+                });
+            },
+            danger: function (color = 0xfffff0) {
                 return new THREE.MeshBasicMaterial({
                     color: color
                 });

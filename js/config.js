@@ -20,6 +20,7 @@ var CONFIG = {
     INTERVAL_SPEED: 100,
     MOUSE_SCROLL_RELATION : 0.1,
     CAMERA_LOOK_AT_RELATION: 0.001,
+    DANGER_RATE: 1,
     CAMERA : {
         MODE: {
             GOD: 0,
@@ -31,6 +32,7 @@ var CONFIG = {
         NONE: "none",
         AVATAR: "avatar",
         FLAG: "flag",
-        BLOCK: "block"
+        BLOCK: "block",
+        DANGER: "danger"
     }
 }

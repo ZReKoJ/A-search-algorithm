@@ -6,7 +6,8 @@ var messages = {
         undefinedAlgorithm: "Algorithm is not defined",
         noAvatarsSet: "Please, set at least one avatar to begin with",
         noRoutesSet: "Please, set at least one route to begin with",
-        cannotReachGoal: "Cannot reach goal"
+        cannotReachGoal: "Cannot reach goal",
+        dangerZoneTouch: "You entered into a danger zone and ... sorry"
     },
     info: {
         uses: {

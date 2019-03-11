@@ -248,7 +248,6 @@ function settingPanel(div) {
         } catch (err) {
             stateButton.text("Ejecutar");
             notifier.error(err.message);
-            console.log(err)
         }
     });
 

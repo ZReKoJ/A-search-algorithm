@@ -110,6 +110,7 @@ class Node {
         this.childrenNodes.forEach(child => {
             child.update();
         });
+        console.log("Updated: " + this.toString());
     }
 
     isEqual(that) {
@@ -125,7 +126,7 @@ class Node {
     }
 
     toString() {
-        return this.coord.toString() + "{" + this.g + ", " + this.h + ", " + this.f + "}";
+        return this.coord.toString() + "{ g: " + this.g + ", h: " + this.h + ", f: " + this.f + (this.parentNode ? ", parent" + this.parentNode.coord.toString() : "") + "}" + (this.danger == 0 ? "" : " has danger");
     }
 
     surrounding() {
@@ -148,12 +149,19 @@ class ASearch {
             .addParent()
             .goal(end)
         ];
+        this.open.forEach(element => {
+            console.log("Check element: " + element.toString())
+        });
         this.closed = [];
 
         let solution = [];
 
         // Getting the first node from open list
         let node = this.open.shift();
+        console.log("Getting node " + node.toString());
+        this.map.blocks.forEach(element => {
+            console.log("Closed: " + new Node(element).toString())
+        });
 
         while (node && node.h > 0) {
             // Move the node to the closed list
@@ -200,6 +208,8 @@ class ASearch {
                     .addParent(node)
                     .goal(end);
 
+                console.log("Check element: " + element.toString());
+
                 let collision = !this.map.solution.every(
                     (sol, index) => {
                         if (index < this.index) {
@@ -226,6 +236,7 @@ class ASearch {
                     );
                     if (index > -1) {
                         if (element.isLessThan(this.open[index])) {
+                            console.log("Conflict need update");
                             this.open[index]
                                 .removeParent()
                                 .addParent(node)
@@ -234,6 +245,8 @@ class ASearch {
                             this.open.sort(
                                 (a, b) => a.isLessThan(b) ? -1 : 1
                             );
+                        } else {
+                            console.log("Conflict no insert");
                         }
                     } else {
                         index = this.open.findIndex(
@@ -248,6 +261,7 @@ class ASearch {
                 }
             });
             node = this.open.shift();
+            console.log("Getting node " + node.toString());
         }
 
         if (node) {

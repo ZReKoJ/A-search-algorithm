@@ -5,6 +5,8 @@ var scene = new Scene();
 var meshFactory = new MeshFactory();
 
 $(() => {
+    loadExternalData();
+    
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 

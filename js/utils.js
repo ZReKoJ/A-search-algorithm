@@ -4,6 +4,22 @@ var states = new Array(2);
 // [resize, drag]
 const resize = 0;
 const drag = 1;
+const locale = "es_ES";
+
+function loadExternalData() {
+    let request = new XMLHttpRequest();
+    request.onreadystatechange = () => {
+        if (request.readyState == 4) {
+            let data = JSON.parse(request.responseText);
+            let list = document.querySelector(".algorithms-links > .hidden-menu");
+            data[locale].forEach(link => {
+                list.innerHTML += '<li><a href="' + link["Link"] + '" />' + link["Title"] + '</a></li>';
+            })
+        }
+    };
+    request.open("GET", "https://zihaohong.github.io/data/links/algorithms.json", true);
+    request.send();
+}
 
 function makeResizableDiv(div, action = "mousedown") {
     const element = document.querySelector(div);

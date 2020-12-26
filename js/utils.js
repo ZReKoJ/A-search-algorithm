@@ -203,3 +203,31 @@ class Notifier {
         }, 3000);
     }
 }
+
+function getImageBinaryInfo(pic, callback) {
+    let canvas = document.createElement("canvas");
+    let ctxt = canvas.getContext('2d');
+    let img = new Image;
+    img.src = pic;
+    img.onload = function() {
+        ctxt.drawImage(img, 0, 0);
+        let data = ctxt.getImageData(0, 0, img.width, img.height).data;
+        let pixels = splitArray(data, 4).map(
+            rgba => rgba[0] == 0 && rgba[1] == 0 && rgba[2] == 0 ? 1 : 0
+        )
+        let matrixData = splitArray(pixels, img.width)
+        callback({
+            width: img.width,
+            height: img.height,
+            data: matrixData
+        });
+    }
+}
+
+function splitArray(array, part) {
+    var tmp = [];
+    for(var i = 0; i < array.length; i += part) {
+        tmp.push(array.slice(i, i + part));
+    }
+    return tmp;
+}

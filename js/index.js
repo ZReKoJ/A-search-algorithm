@@ -6,7 +6,7 @@ var meshFactory = new MeshFactory();
 
 $(() => {
     loadExternalData();
-    
+
     makeResizableDiv('.setting-panel');
     makeResizableDiv('.icon-panel');
 
@@ -205,7 +205,20 @@ function settingPanel(div) {
     fileInput.on("change", (e) => {
         let reader = new FileReader();
         reader.onload = function () {
-            console.log(reader.result);
+            getImageBinaryInfo(reader.result, (imageData) => {
+                console.log(imageData)
+                perspectiveButton.text("Vista Perspectiva");
+                scene.resetScene()
+                    .setPlane(imageData.width, imageData.height)
+                    .setCameraMode(CONFIG.CAMERA.MODE.GOD);
+                imageData.data.forEach((row, i) => {
+                    row.forEach((column, j) => {
+                        if (column == 1) {
+                            scene.addObject(i, j, String(CONFIG.ICON.BLOCK))
+                        }
+                    })
+                })
+            });
         };
         reader.readAsDataURL(event.target.files[0]);
     });

@@ -209,25 +209,65 @@ function getImageBinaryInfo(pic, callback) {
     let ctxt = canvas.getContext('2d');
     let img = new Image;
     img.src = pic;
-    img.onload = function() {
+    img.onload = function () {
         ctxt.drawImage(img, 0, 0);
         let data = ctxt.getImageData(0, 0, img.width, img.height).data;
-        let pixels = splitArray(data, 4).map(
-            rgba => rgba[0] == 0 && rgba[1] == 0 && rgba[2] == 0 ? 1 : 0
+        let pixels = splitArray(data, 4)
+        let pixelsBlackWhite = pixels.map(
+            // check if it is closer to black or white
+            rgba => (0.2126 * rgba[0] + 0.7152 * rgba[1] + 0.0722 * rgba[2]) < 128 ? 0 : 1
         )
-        let matrixData = splitArray(pixels, img.width)
-        callback({
+        let matrixData = splitArray(pixelsBlackWhite, img.width)
+        callback(minimizeMatrix(matrixData, {
             width: img.width,
-            height: img.height,
-            data: matrixData
-        });
+            height: img.height
+        }));
     }
 }
 
+function printMatrix(m, x=null) {
+    if (x != null) {
+        m = splitArray(m, x);
+    }
+    console.log(m.map(a => a.join("")).join("\n"));
+}
+
 function splitArray(array, part) {
-    var tmp = [];
-    for(var i = 0; i < array.length; i += part) {
+    let tmp = [];
+    for (let i = 0; i < array.length; i += part) {
         tmp.push(array.slice(i, i + part));
     }
     return tmp;
+}
+
+function minimizeMatrix(matrix, dimension) {
+    // 100 is the max set dimension to be run
+    let maxDimension = 100;
+    let toDivide = Math.ceil(Math.max(dimension.width, dimension.height) / maxDimension)
+    if (toDivide > 1) {
+        let tmpWidth = Math.ceil(dimension.width / toDivide);
+        let tmpHeight = Math.ceil(dimension.height / toDivide);
+        let tmp = createArray(tmpWidth, tmpHeight)
+        for (let i = 0; i < tmpHeight; i++) {
+            for (let j = 0; j < tmpWidth; j++) {
+                let count = 0
+                for (let ii = toDivide * i; ii < toDivide * (i + 1) && ii < dimension.height; ii++) {
+                    for (let jj = toDivide * j; jj < toDivide * (j + 1) && jj < dimension.width; jj++) {
+                        count += matrix[ii][jj]
+                    }
+                }
+                tmp[i][j] = count >= (toDivide * toDivide / 2) ? 1 : 0
+            }
+        }
+        return {
+            width: tmpWidth,
+            height: tmpHeight,
+            data: tmp
+        }
+    }
+    return {
+        width: img.width,
+        height: img.height,
+        data: matrix
+    }
 }

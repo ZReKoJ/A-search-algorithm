@@ -211,16 +211,18 @@ function settingPanel(div) {
                 scene.resetScene()
                     .setPlane(imageData.width, imageData.height)
                     .setCameraMode(CONFIG.CAMERA.MODE.GOD);
+                widthInput.val(Math.min(imageData.width, widthInput.attr("max")));
+                heightInput.val(Math.min(imageData.height, heightInput.attr("max")));
                 imageData.data.forEach((row, i) => {
                     row.forEach((column, j) => {
-                        if (column == 1) {
+                        if (column == 0) {
                             scene.addObject(i, j, String(CONFIG.ICON.BLOCK))
                         }
                     })
                 })
             });
         };
-        reader.readAsDataURL(event.target.files[0]);
+        reader.readAsDataURL(e.target.files[0]);
     });
 
     let resizeButton = setting.find("button.resize");

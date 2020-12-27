@@ -66,7 +66,7 @@ obviarse.
 
 ![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/samplemap.PNG)
 
-![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/execution.PNG)
+![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/executionmap.PNG)
 
 
 

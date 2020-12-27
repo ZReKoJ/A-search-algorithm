@@ -205,12 +205,11 @@ class Notifier {
 }
 
 function getImageBinaryInfo(pic, callback) {
-    let canvas = document.createElement("canvas");
-    let ctxt = canvas.getContext('2d');
-    let img = new Image;
-    img.src = pic;
+    let img = new Image();
     img.onload = function () {
-        ctxt.drawImage(img, 0, 0);
+        let canvas = document.createElement("canvas");
+        let ctxt = canvas.getContext('2d');
+        ctxt.drawImage(img, 0, 0, img.width, img.height);
         let data = ctxt.getImageData(0, 0, img.width, img.height).data;
         let pixels = splitArray(data, 4)
         let pixelsBlackWhite = pixels.map(
@@ -223,6 +222,7 @@ function getImageBinaryInfo(pic, callback) {
             height: img.height
         }));
     }
+    img.src = pic;
 }
 
 function printMatrix(m, x=null) {
@@ -266,8 +266,10 @@ function minimizeMatrix(matrix, dimension) {
         }
     }
     return {
-        width: img.width,
-        height: img.height,
+        width: dimension.width,
+        height: dimension.height,
         data: matrix
     }
 }
+
+

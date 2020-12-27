@@ -23,9 +23,11 @@ actual y por tanto la propiedad de admisibilidad del algoritmo se mantiene.
 i) Si se tiene idea de la posición del objetivo, determinadas expansiones pueden evitarse. Por ejemplo si
 el objetivo está a la derecha del nodo inicial, los nodos situados a la izquierda de éste pueden
 obviarse.
+```
 
 2.- Algoritmo A*
 
+```
 1. Colocar el nodo de comienzo en la lista ABIERTA y calcular la función de coste f(n), siendo ahora
     g(n) = 0 y h(n) la distancia entre la posición actual y la meta.
 2. Los obstáculos se incluyen directamente en la lista CERRADA.
@@ -42,13 +44,29 @@ obviarse.
 6. Con cualquiera de los sucesores que ya estaban en ABIERTA calcular el menor coste de entre el que
     ya tenía y el recién calculado: min(nuevo f(n), viejo f(n)).
 7. Ir al paso 3
+```
 
 3.- Funcionamiento
 
 1. La página consta de cuatro zonas
+
+![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/initpage.PNG)
+
 - La cabecera: Contiene pestañas que saltan a otras páginas, donde la pestaña Documentación se especifica las herramientas y páginas usadas para el proyecto.
-- La mapa: Se dibuja el plano el cual se realiza el algoritmo, existen dos perspectivas de vista.
+
 - La zona de los iconos
+
+![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/iconbar.PNG)
+
 - La zona de configuraciones, para ver más configuraciones hay que arrastrar con el ratón
+
 ![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/toolbar.PNG)
+
+- La mapa: Se dibuja el plano el cual se realiza el algoritmo, existen dos perspectivas de vista.
+
+![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/samplemap.PNG)
+
+![alt text](https://zrekoj.github.io/A-search-algorithm/resources/readme/execution.PNG)
+
+
 
